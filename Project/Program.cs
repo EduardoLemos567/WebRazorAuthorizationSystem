@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Project.Data;
+using Project.Models;
 using Project.Permissions;
 
 internal class Program
@@ -19,7 +20,7 @@ internal class Program
         // Add services to the container.
         builder.Services.AddRazorPages();
         AddDatabaseService(builder);
-        AddLoginService<IdentityUser<int>>(builder);
+        AddLoginService(builder);
     }
     private static void AddDatabaseService(WebApplicationBuilder builder)
     {
@@ -28,13 +29,11 @@ internal class Program
                 builder.Configuration.GetConnectionString("DataContextPath") ??
                 throw new InvalidOperationException("Connection string 'DataContextPath' not found.")));
     }
-    private static void AddLoginService<TUser>(WebApplicationBuilder builder) where TUser : class
+    private static void AddLoginService(WebApplicationBuilder builder)
     {
-        builder.Services.AddScoped<
-            IUserStore<TUser>,
-            Project.Login.UserStore<TUser>
-        >();
-        builder.Services.AddIdentityCore<TUser>(options =>
+        builder.Services.AddScoped<IUserStore<UserAccount>, Project.Login.NormalUserStore>();
+        builder.Services.AddScoped<IUserStore<StaffAccount>, Project.Login.StaffUserStore>();
+        builder.Services.AddIdentityCore<IdentityUser<int>>(options =>
         {
             options.SignIn.RequireConfirmedAccount = true;
             // Password settings.

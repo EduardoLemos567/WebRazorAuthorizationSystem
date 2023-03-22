@@ -1,20 +1,143 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Project.Data;
+using Project.Models;
 
 namespace Project.Login;
 
-public class UserStore<TUser> : IUserStore<TUser> where TUser : class
+public abstract class UserStore<TUser> : IUserStore<TUser> where TUser : IdentityUser<int>
 {
-    private readonly DataContext db;
-    public Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken) => throw new NotImplementedException();
-    public Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken) => throw new NotImplementedException();
-    public void Dispose() => throw new NotImplementedException();
-    public Task<TUser?> FindByIdAsync(string userId, CancellationToken cancellationToken) => throw new NotImplementedException();
-    public Task<TUser?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken) => throw new NotImplementedException();
-    public Task<string?> GetNormalizedUserNameAsync(TUser user, CancellationToken cancellationToken) => throw new NotImplementedException();
-    public Task<string> GetUserIdAsync(TUser user, CancellationToken cancellationToken) => throw new NotImplementedException();
-    public Task<string?> GetUserNameAsync(TUser user, CancellationToken cancellationToken) => throw new NotImplementedException();
-    public Task SetNormalizedUserNameAsync(TUser user, string? normalizedName, CancellationToken cancellationToken) => throw new NotImplementedException();
-    public Task SetUserNameAsync(TUser user, string? userName, CancellationToken cancellationToken) => throw new NotImplementedException();
+    protected readonly DataContext db;
+    private readonly ILookupNormalizer normalizer;
+    private bool disposed;
+    protected UserStore(DataContext db, ILookupNormalizer normalizer)
+    {
+        this.db = db;
+        this.normalizer = normalizer;
+    }
+    protected abstract DbSet<TUser> Users { get; }
+    public async Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ThrowIfDisposed();
+        ThrowIfNull(user);
+        Users.Add(user);
+        await db.SaveChangesAsync(cancellationToken);
+        return IdentityResult.Success;
+    }
+    public async Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ThrowIfDisposed();
+        ThrowIfNull(user);
+        Users.Remove(user);
+        await db.SaveChangesAsync(cancellationToken);
+        return IdentityResult.Success;
+    }
+    public Task<TUser?> FindByIdAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ThrowIfDisposed();
+        var id = ConvertIdFromString(userId);
+        return Users.FindAsync(new object?[] { id }, cancellationToken).AsTask();
+    }
+    public Task<TUser?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ThrowIfDisposed();
+        return Users.FirstOrDefaultAsync(u => u.NormalizedUserName == normalizedUserName, cancellationToken);
+    }
+    public Task<string?> GetNormalizedUserNameAsync(TUser user, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ThrowIfDisposed();
+        string? result = default;
+        if (user.NormalizedUserName != null)
+        {
+            result = user.NormalizedUserName;
+        }
+        if (user.UserName != null)
+        {
+            result = normalizer.NormalizeName(user.UserName);
+        }
+        return Task.FromResult(result);
+    }
+    public Task<string> GetUserIdAsync(TUser user, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ThrowIfDisposed();
+        ThrowIfNull(user);
+        return Task.FromResult(ConvertIdToString(user.Id)!);
+    }
+    public Task<string?> GetUserNameAsync(TUser user, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ThrowIfDisposed();
+        ThrowIfNull(user);
+        return Task.FromResult(user.UserName);
+    }
+    public Task SetNormalizedUserNameAsync(TUser user, string? normalizedName, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ThrowIfDisposed();
+        ThrowIfNull(user);
+        user.NormalizedUserName = normalizedName;
+        return Task.CompletedTask;
+    }
+    public Task SetUserNameAsync(TUser user, string? userName, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ThrowIfDisposed();
+        ThrowIfNull(user);
+        user.UserName = userName;
+        return Task.CompletedTask;
+    }
     public Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken) => throw new NotImplementedException();
+    public void Dispose() => disposed = true;
+    private void ThrowIfDisposed()
+    {
+        if (disposed)
+        {
+            throw new ObjectDisposedException(GetType().Name);
+        }
+    }
+    private static void ThrowIfNull(in TUser? user)
+    {
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
+    }
+    private static int? ConvertIdFromString(string? id)
+    {
+        if (id == null)
+        {
+            return default(int);
+        }
+        if (int.TryParse(id, out var number))
+        {
+            return number;
+        }
+        return default;
+    }
+    private static string? ConvertIdToString(int id)
+    {
+        if (id == default)
+        {
+            return null;
+        }
+        return id.ToString();
+    }
+}
+
+public class NormalUserStore : UserStore<UserAccount>
+{
+    public NormalUserStore(DataContext db, ILookupNormalizer normalizer) : base(db, normalizer) { }
+    protected override DbSet<UserAccount> Users => db.UserAccounts;
+}
+
+public class StaffUserStore : UserStore<StaffAccount>
+{
+    public StaffUserStore(DataContext db, ILookupNormalizer normalizer) : base(db, normalizer) { }
+    protected override DbSet<StaffAccount> Users => db.StaffAccounts;
 }

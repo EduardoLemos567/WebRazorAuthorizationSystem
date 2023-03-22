@@ -19,7 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
     <Folder Include="Pages\Admin\UserAccount\" />
     <Folder Include="Pages\Admin\StaffRole\" />
     <Folder Include="Pages\Admin\StaffAccount\" />
