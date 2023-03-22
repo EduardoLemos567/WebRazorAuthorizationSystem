@@ -6,8 +6,8 @@ namespace Project.Pages.Admin.MovieCategory;
 
 public class DeleteModel : PageModel
 {
-    private readonly Data.SauceContext db;
-    public DeleteModel(Data.SauceContext context) => this.db = context;
+    private readonly Data.DataContext db;
+    public DeleteModel(Data.DataContext context) => this.db = context;
     [BindProperty]
     public Models.MovieCategory MovieCategory { get; set; } = default!;
     public async Task<IActionResult> OnGetAsync(int? id)

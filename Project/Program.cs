@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Project.Data;
 using Project.Permissions;
 
@@ -10,7 +9,6 @@ internal class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         AddServices(builder);
-
         var app = builder.Build();
         AddSeedData(app);
         AddMiddlewares(app);
@@ -20,31 +18,41 @@ internal class Program
     {
         // Add services to the container.
         builder.Services.AddRazorPages();
-        builder.Services.AddDbContext<SauceContext>(o =>
-            o.UseSqlServer(
-                builder.Configuration.GetConnectionString("SauceContext") ??
-                throw new InvalidOperationException("Connection string 'SauceContext' not found."))
-        );
-        
-        builder.Services.AddIdentityCore<IdentityUser<int>>(options =>
-            {
-                options.SignIn.RequireConfirmedAccount = true;
-                // Password settings.
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequiredLength = 6;
-                options.Password.RequiredUniqueChars = 1;
-                // Lockout settings.
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-                options.Lockout.MaxFailedAccessAttempts = 5;
-                options.Lockout.AllowedForNewUsers = true;
-                // User settings.
-                options.User.AllowedUserNameCharacters =
-                "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-                options.User.RequireUniqueEmail = false;
-            });
+        AddDatabaseService(builder);
+        AddLoginService<IdentityUser<int>>(builder);
+    }
+    private static void AddDatabaseService(WebApplicationBuilder builder)
+    {
+        builder.Services.AddDbContext<DataContext>(o =>
+            o.UseSqlite(
+                builder.Configuration.GetConnectionString("DataContextPath") ??
+                throw new InvalidOperationException("Connection string 'DataContextPath' not found.")));
+    }
+    private static void AddLoginService<TUser>(WebApplicationBuilder builder) where TUser : class
+    {
+        builder.Services.AddScoped<
+            IUserStore<TUser>,
+            Project.Login.UserStore<TUser>
+        >();
+        builder.Services.AddIdentityCore<TUser>(options =>
+        {
+            options.SignIn.RequireConfirmedAccount = true;
+            // Password settings.
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireNonAlphanumeric = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequiredLength = 6;
+            options.Password.RequiredUniqueChars = 1;
+            // Lockout settings.
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+            options.Lockout.MaxFailedAccessAttempts = 5;
+            options.Lockout.AllowedForNewUsers = true;
+            // User settings.
+            options.User.AllowedUserNameCharacters =
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+            options.User.RequireUniqueEmail = true;
+        });
         builder.Services.ConfigureApplicationCookie(options =>
         {
             // Cookie settings
@@ -59,7 +67,7 @@ internal class Program
     {
         using (var scope = app.Services.CreateScope())
         {
-            using (var db = new SauceContext(scope.ServiceProvider.GetRequiredService<DbContextOptions<SauceContext>>()))
+            using (var db = new DataContext(scope.ServiceProvider.GetRequiredService<DbContextOptions<DataContext>>()))
             {
                 var seeder = new DataSeeder(db);
                 seeder.SeedAllModels();

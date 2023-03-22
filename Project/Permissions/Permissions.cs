@@ -15,8 +15,9 @@ public enum Actions : short
 {
     NoAction,
     Create,
-    Read,
+    Read,   // Read individual details
     Update,
     Delete,
+    List,   // List page
     // Max 8 options = 3 bits
 }

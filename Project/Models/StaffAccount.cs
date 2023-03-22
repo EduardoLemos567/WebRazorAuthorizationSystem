@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Project.Permissions;
+﻿using Project.Permissions;
 using System.ComponentModel.DataAnnotations;
 
 namespace Project.Models;
@@ -15,15 +14,5 @@ public class StaffAccount : Account
         Array.Sort(charArray);
         Permissions = new(charArray);
     }
-    public bool HasPermission(in Permission permission)
-    {
-        foreach (var c in Permissions!)
-        {
-            if (permission.data == c)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
+    public bool HasPermission(in Permission permission) => Permissions!.Contains(permission.data);
 }

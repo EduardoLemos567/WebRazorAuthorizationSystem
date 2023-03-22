@@ -1,13 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Project.Models;
+﻿using Project.Models;
 
 namespace Project.Data;
 
 public class DataSeeder
 {
-    private readonly SauceContext db;
+    private readonly DataContext db;
     private readonly Random rng;
-    public DataSeeder(SauceContext db)
+    public DataSeeder(DataContext db)
     {
         this.db = db;
         this.rng = new Random(1234);
@@ -17,7 +16,6 @@ public class DataSeeder
         this.SeedMovieCategories();
         this.SeedMovies();
         this.SeedUserAccounts();
-        this.SeedStaffRoles();
         this.SeedStaffAccounts();
     }
     public void SeedMovieCategories()
@@ -58,28 +56,14 @@ public class DataSeeder
         }
         this.db.SaveChanges();
     }
-    public void SeedStaffRoles()
-    {
-        if (this.db.PermissionsPackages.Any()) { return; }
-        foreach (var i in Enumerable.Range(0, 10))
-        {
-            _ = this.db.Add(new StaffRole()
-            {
-                Name = $"StaffRole {i + 1}",
-                Powers = (uint)this.rng.Next(0, 1000)
-            });
-        }
-        _ = this.db.SaveChanges();
-    }
     public void SeedStaffAccounts()
     {
         if (this.db.StaffAccounts.Any()) { return; }
-        var staffRoles = this.db.PermissionsPackages.ToList();
         foreach (var i in Enumerable.Range(0, 20))
         {
             var staff = new StaffAccount();
             SeedAccount(staff, i);
-            staff.Permissions = staffRoles[this.rng.Next(staffRoles.Count)];
+            staff.Permissions = string.Empty;
             this.db.Add(staff);
         }
         this.db.SaveChanges();

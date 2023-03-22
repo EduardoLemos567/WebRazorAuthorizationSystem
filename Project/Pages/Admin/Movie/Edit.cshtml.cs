@@ -1,14 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Project.Permissions;
 
 namespace Project.Pages.Admin.Movie;
 
+[HasPermission(Places.Movie, Actions.Update)]
 public class EditModel : PageModel
 {
-    private readonly Data.SauceContext db;
+    private readonly Data.DataContext db;
 
-    public EditModel(Data.SauceContext context) => this.db = context;
+    public EditModel(Data.DataContext context) => this.db = context;
     [BindProperty]
     public Models.Movie Movie { get; set; } = default!;
     public async Task<IActionResult> OnGetAsync(int? id)

@@ -2,9 +2,9 @@
 
 namespace Project.Data;
 
-public class SauceContext : DbContext
+public class DataContext : DbContext
 {
-    public SauceContext(DbContextOptions<SauceContext> options, ILogger<SauceContext> a)
+    public DataContext(DbContextOptions<DataContext> options)
         : base(options)
     { }
     public DbSet<Models.Movie> Movies { get; set; } = default!;
@@ -12,7 +12,7 @@ public class SauceContext : DbContext
     public DbSet<Models.UserAccount> UserAccounts { get; set; } = default!;
     public DbSet<Models.StaffAccount> StaffAccounts { get; set; } = default!;
     public DbSet<Models.PermissionsPackage> PermissionsPackages { get; set; } = default!;
-    protected override void ConfigureConventions(ModelConfigurationBuilder builder) => 
+    protected override void ConfigureConventions(ModelConfigurationBuilder builder) =>
         builder.Properties<DateOnly>()
             .HaveConversion<DateOnlyConverter>()
             .HaveColumnType("date");

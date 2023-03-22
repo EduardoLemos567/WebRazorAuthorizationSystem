@@ -1,65 +1,150 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Project.Models;
-using Project.Data;
-using NuGet.Protocol.Plugins;
 using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
 
 namespace Project.Login;
 
-public interface IUserManager
-{
-
-}
-
 public class AuthenticationService<TUser> where TUser : IdentityUser<int>
 {
-    public class LoginInfo
+    const bool LOCKOUT_ON_FAILURE = true;
+    public class LoginDetails
     {
         [Required]
-        public string? User { get; set; }
+        public string? Email { get; set; }
         [Required]
         public string? Password { get; set; }
         public bool RememberMe { get; set; }
     }
+    private readonly UserManager<TUser> userManager;
     private readonly SignInManager<TUser> signInManager;
-    public async Task<IdentityResult> TryCreateAccount(LoginInfo login)
+    private readonly ILogger<AuthenticationService<TUser>> logger;
+    public AuthenticationService(UserManager<TUser> userManager, SignInManager<TUser> signInManager, ILogger<AuthenticationService<TUser>> logger)
     {
-
-        if (!Validator.TryValidateObject(login, new ValidationContext(login), null))
+        this.userManager = userManager;
+        this.signInManager = signInManager;
+        this.logger = logger;
+    }
+    public async Task<IdentityResult> TryCreateAccount(TUser user, string password, PageModel page)
+    {
+        var creationResult = await userManager.CreateAsync(user, password);
+        if (creationResult.Succeeded)
         {
-            // login invalid
+            var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+            var url = page.Url.Action(new() { Action = "ConfirmEmail", Values = new { user.Email, token } });
+            if (string.IsNullOrEmpty(url))
+            {
+                return CouldNotGenerateUrl();
+            }
+            await SendConfirmationEmail(url!);
         }
-        var user = Activator.CreateInstance<TUser>();
-        user.UserName = login.User;
-        return await signInManager.UserManager.CreateAsync(user, login.Password!);
+        return creationResult;
     }
-    public async Task<IdentityResult> TrySignInAccount(LoginInfo login)
+    public async Task<SignInResult> TrySignInAccount(LoginDetails loginDetails)
     {
-        if (!Validator.TryValidateObject(login, new ValidationContext(login), null))
+        if (!IsValid(loginDetails))
         {
-            // login invalid
+            // Login is incomplete
         }
-        var result = await signInManager.PasswordSignInAsync(login.User!, login.Password!, login.RememberMe, true);
-        if (result.Succeeded)
+        var user = await userManager.FindByEmailAsync(loginDetails.Email!);
+        if (user is null)
         {
-            var user = await signInManager.UserManager.FindByNameAsync(login.User!);
-            await signInManager.SignInWithClaimsAsync(user!, null, null);
+            // No user with that email
         }
+        var signInResult = await signInManager.CheckPasswordSignInAsync(user!, loginDetails.Password!, LOCKOUT_ON_FAILURE);
+        if (!signInResult.Succeeded)
+        {
+            // Login did not succeed
+        }
+        // NOTE: need to change flow to enable two factor auth.
+        if (user is StaffAccount staff)
+        {
+            await signInManager.SignInWithClaimsAsync(user!, loginDetails.RememberMe, new Claim[] { new("p", staff.Permissions!) });
+        }
+        else
+        {
+            await signInManager.SignInAsync(user!, loginDetails.RememberMe);
+        }
+        return signInResult;
     }
-    public async Task DeleteAccount()
+    public async Task<IdentityResult> ConfirmEmail(string email, string token)
     {
-
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return UserNotFound();
+        }
+        return await userManager.ConfirmEmailAsync(user!, token);
     }
-    public async Task ResetPassword()
+    public async Task<IdentityResult> DeleteAccount(string email)
     {
-
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return UserNotFound();
+        }
+        return await userManager.DeleteAsync(user!);
     }
-    public async Task ChangePassword()
+    public async Task<IdentityResult> RequestResetPassword(string email, PageModel page)
     {
-
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return UserNotFound();
+        }
+        var token = await userManager.GeneratePasswordResetTokenAsync(user);
+        var url = page.Url.Action(new() { Action = "RequestedResetPassword", Values = new { user.Email, token } });
+        if (string.IsNullOrEmpty(url))
+        {
+            return CouldNotGenerateUrl();
+        }
+        await SendPasswordResetEmail(url!);
+        return IdentityResult.Success;
     }
+    public async Task<IdentityResult> ResetPassword(string email, string token, string newPassword)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return UserNotFound();
+        }
+        return await userManager.ResetPasswordAsync(user, token, newPassword);
+    }
+    public async Task<IdentityResult> ChangePassword(string email, string currentPassword, string newPassword)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        if (user is null)
+        {
+            return UserNotFound();
+        }
+        return await userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+    }
+    private async Task SendConfirmationEmail(string url)
+    {
+        //TODO: send email
+        logger.LogDebug($"confirmation email sent with url '{url}'");
+        await Task.Delay(1);
+    }
+    private async Task SendPasswordResetEmail(string url)
+    {
+        //TODO: send email
+        logger.LogDebug($"password reset email sent with url '{url}'");
+        await Task.Delay(1);
+    }
+    private IdentityResult UserNotFound()
+    {
+        logger.LogDebug($"User not found by email");
+        return IdentityResult.Failed(new IdentityError() { Description = "User not found" });
+    }
+    private IdentityResult CouldNotGenerateUrl()
+    {
+        logger.LogDebug($"Could not generate token url");
+        return IdentityResult.Failed(new IdentityError() { Description = "Could not generate token url" });
+    }
+    private static bool IsValid(LoginDetails login)
+    {
+        return !Validator.TryValidateObject(login, new ValidationContext(login), null);
+    }
+
 }

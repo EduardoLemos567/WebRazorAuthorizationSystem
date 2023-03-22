@@ -5,8 +5,8 @@ namespace Project.Pages.Admin.MovieCategory;
 
 public class IndexModel : PageModel
 {
-    private readonly Data.SauceContext db;
-    public IndexModel(Data.SauceContext context) => this.db = context;
+    private readonly Data.DataContext db;
+    public IndexModel(Data.DataContext context) => this.db = context;
     public IList<Models.MovieCategory> MovieCategory { get; set; } = default!;
     public async Task OnGetAsync()
     {

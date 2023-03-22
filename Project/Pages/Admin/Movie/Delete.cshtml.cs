@@ -1,13 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Project.Permissions;
 
 namespace Project.Pages.Admin.Movie;
 
+[HasPermission(Places.Movie, Actions.Delete)]
 public class DeleteModel : PageModel
 {
-    private readonly Data.SauceContext db;
-    public DeleteModel(Data.SauceContext context) => this.db = context;
+    private readonly Data.DataContext db;
+    public DeleteModel(Data.DataContext context) => this.db = context;
     [BindProperty]
     public Models.Movie Movie { get; set; } = default!;
     public async Task<IActionResult> OnGetAsync(int? id)
