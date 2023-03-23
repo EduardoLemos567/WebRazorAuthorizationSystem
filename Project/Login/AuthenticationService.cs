@@ -8,7 +8,7 @@ namespace Project.Login;
 
 public class AuthenticationService<TUser> where TUser : IdentityUser<int>
 {
-    const bool LOCKOUT_ON_FAILURE = true;
+    private const bool LOCKOUT_ON_FAILURE = true;
     public class LoginDetails
     {
         [Required]
@@ -37,9 +37,14 @@ public class AuthenticationService<TUser> where TUser : IdentityUser<int>
             {
                 return CouldNotGenerateUrl();
             }
-            await SendConfirmationEmail(url!);
+            await SendConfirmationEmail(user.Email!, url!);
         }
         return creationResult;
+    }
+    public Task<IdentityResult> TryCreateConfirmedAccount(TUser user, string password)
+    {
+        user.EmailConfirmed = true;
+        return userManager.CreateAsync(user, password);
     }
     public async Task<SignInResult> TrySignInAccount(LoginDetails loginDetails)
     {
@@ -99,7 +104,7 @@ public class AuthenticationService<TUser> where TUser : IdentityUser<int>
         {
             return CouldNotGenerateUrl();
         }
-        await SendPasswordResetEmail(url!);
+        await SendPasswordResetEmail(user.Email!, url!);
         return IdentityResult.Success;
     }
     public async Task<IdentityResult> ResetPassword(string email, string token, string newPassword)
@@ -120,13 +125,13 @@ public class AuthenticationService<TUser> where TUser : IdentityUser<int>
         }
         return await userManager.ChangePasswordAsync(user, currentPassword, newPassword);
     }
-    private async Task SendConfirmationEmail(string url)
+    private async Task SendConfirmationEmail(string email, string url)
     {
         //TODO: send email
         logger.LogDebug($"confirmation email sent with url '{url}'");
         await Task.Delay(1);
     }
-    private async Task SendPasswordResetEmail(string url)
+    private async Task SendPasswordResetEmail(string email, string url)
     {
         //TODO: send email
         logger.LogDebug($"password reset email sent with url '{url}'");
@@ -145,6 +150,13 @@ public class AuthenticationService<TUser> where TUser : IdentityUser<int>
     private static bool IsValid(LoginDetails login)
     {
         return !Validator.TryValidateObject(login, new ValidationContext(login), null);
+    }
+    private static void ThrowIfNull(in TUser? user)
+    {
+        if (user is null)
+        {
+            throw new ArgumentNullException(nameof(user));
+        }
     }
 
 }

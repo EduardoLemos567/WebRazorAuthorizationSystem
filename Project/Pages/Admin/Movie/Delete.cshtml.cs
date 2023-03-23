@@ -39,8 +39,8 @@ public class DeleteModel : PageModel
         if (movie != null)
         {
             this.Movie = movie;
-            _ = this.db.Movies.Remove(this.Movie);
-            _ = await this.db.SaveChangesAsync();
+            this.db.Movies.Remove(this.Movie);
+            await this.db.SaveChangesAsync();
         }
         return this.RedirectToPage("./Index");
     }

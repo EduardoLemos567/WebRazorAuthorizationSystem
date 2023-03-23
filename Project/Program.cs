@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Project.Data;
+using Project.Login;
 using Project.Models;
 using Project.Permissions;
 
@@ -9,31 +10,56 @@ internal class Program
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        AddServices(builder);
+        AddServices(builder.Services, builder.Configuration);
         var app = builder.Build();
         AddSeedData(app);
         AddMiddlewares(app);
         app.Run();
     }
-    private static void AddServices(WebApplicationBuilder builder)
+    private static void AddServices(IServiceCollection services, ConfigurationManager configurator)
     {
         // Add services to the container.
-        builder.Services.AddRazorPages();
-        AddDatabaseService(builder);
-        AddLoginService(builder);
+        services.AddRazorPages();
+        AddDatabaseService(services, configurator);
+        AddLoginService(services);
+        services.AddSingleton<PermissionService>();
+        services.AddHostedService<PostRunSetupService>();
     }
-    private static void AddDatabaseService(WebApplicationBuilder builder)
+    private static void AddDatabaseService(IServiceCollection services, ConfigurationManager configurator)
     {
-        builder.Services.AddDbContext<DataContext>(o =>
+        services.AddDbContext<DataContext>(o =>
             o.UseSqlite(
-                builder.Configuration.GetConnectionString("DataContextPath") ??
+                configurator.GetConnectionString("DataContextPath") ??
                 throw new InvalidOperationException("Connection string 'DataContextPath' not found.")));
     }
-    private static void AddLoginService(WebApplicationBuilder builder)
+    private static void AddLoginService(IServiceCollection services)
     {
-        builder.Services.AddScoped<IUserStore<UserAccount>, Project.Login.NormalUserStore>();
-        builder.Services.AddScoped<IUserStore<StaffAccount>, Project.Login.StaffUserStore>();
-        builder.Services.AddIdentityCore<IdentityUser<int>>(options =>
+        services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        // UserAccount services
+        AddIdentityCore<UserAccount>(services);
+        services.AddScoped<UserManager<UserAccount>>();
+        services.AddScoped<SignInManager<UserAccount>>();
+        services.AddScoped<AuthenticationService<UserAccount>>();
+        services.AddScoped<IUserStore<UserAccount>, NormalUserStore>();
+        // StaffAccount services
+        AddIdentityCore<StaffAccount>(services);
+        services.AddScoped<UserManager<StaffAccount>>();
+        services.AddScoped<SignInManager<StaffAccount>>();
+        services.AddScoped<AuthenticationService<StaffAccount>>();
+        services.AddScoped<IUserStore<StaffAccount>, StaffUserStore>();
+        services.ConfigureApplicationCookie(options =>
+        {
+            // Cookie settings
+            options.Cookie.HttpOnly = true;
+            options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+            options.LoginPath = "/Identity/Account/Login";
+            options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+            options.SlidingExpiration = true;
+        });
+    }
+    private static void AddIdentityCore<TUser>(IServiceCollection services) where TUser : IdentityUser<int>
+    {
+        services.AddIdentityCore<TUser>(options =>
         {
             options.SignIn.RequireConfirmedAccount = true;
             // Password settings.
@@ -51,15 +77,6 @@ internal class Program
             options.User.AllowedUserNameCharacters =
             "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
             options.User.RequireUniqueEmail = true;
-        });
-        builder.Services.ConfigureApplicationCookie(options =>
-        {
-            // Cookie settings
-            options.Cookie.HttpOnly = true;
-            options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
-            options.LoginPath = "/Identity/Account/Login";
-            options.AccessDeniedPath = "/Identity/Account/AccessDenied";
-            options.SlidingExpiration = true;
         });
     }
     private static void AddSeedData(WebApplication app)

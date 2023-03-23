@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Project.Data;
-using Project.Models;
 
 namespace Project.Login;
 
@@ -20,7 +19,6 @@ public abstract class UserStore<TUser> : IUserStore<TUser> where TUser : Identit
     {
         cancellationToken.ThrowIfCancellationRequested();
         ThrowIfDisposed();
-        ThrowIfNull(user);
         Users.Add(user);
         await db.SaveChangesAsync(cancellationToken);
         return IdentityResult.Success;
@@ -29,7 +27,6 @@ public abstract class UserStore<TUser> : IUserStore<TUser> where TUser : Identit
     {
         cancellationToken.ThrowIfCancellationRequested();
         ThrowIfDisposed();
-        ThrowIfNull(user);
         Users.Remove(user);
         await db.SaveChangesAsync(cancellationToken);
         return IdentityResult.Success;
@@ -66,21 +63,18 @@ public abstract class UserStore<TUser> : IUserStore<TUser> where TUser : Identit
     {
         cancellationToken.ThrowIfCancellationRequested();
         ThrowIfDisposed();
-        ThrowIfNull(user);
         return Task.FromResult(ConvertIdToString(user.Id)!);
     }
     public Task<string?> GetUserNameAsync(TUser user, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         ThrowIfDisposed();
-        ThrowIfNull(user);
         return Task.FromResult(user.UserName);
     }
     public Task SetNormalizedUserNameAsync(TUser user, string? normalizedName, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         ThrowIfDisposed();
-        ThrowIfNull(user);
         user.NormalizedUserName = normalizedName;
         return Task.CompletedTask;
     }
@@ -88,7 +82,6 @@ public abstract class UserStore<TUser> : IUserStore<TUser> where TUser : Identit
     {
         cancellationToken.ThrowIfCancellationRequested();
         ThrowIfDisposed();
-        ThrowIfNull(user);
         user.UserName = userName;
         return Task.CompletedTask;
     }
@@ -99,13 +92,6 @@ public abstract class UserStore<TUser> : IUserStore<TUser> where TUser : Identit
         if (disposed)
         {
             throw new ObjectDisposedException(GetType().Name);
-        }
-    }
-    private static void ThrowIfNull(in TUser? user)
-    {
-        if (user is null)
-        {
-            throw new ArgumentNullException(nameof(user));
         }
     }
     private static int? ConvertIdFromString(string? id)
@@ -128,16 +114,4 @@ public abstract class UserStore<TUser> : IUserStore<TUser> where TUser : Identit
         }
         return id.ToString();
     }
-}
-
-public class NormalUserStore : UserStore<UserAccount>
-{
-    public NormalUserStore(DataContext db, ILookupNormalizer normalizer) : base(db, normalizer) { }
-    protected override DbSet<UserAccount> Users => db.UserAccounts;
-}
-
-public class StaffUserStore : UserStore<StaffAccount>
-{
-    public StaffUserStore(DataContext db, ILookupNormalizer normalizer) : base(db, normalizer) { }
-    protected override DbSet<StaffAccount> Users => db.StaffAccounts;
 }

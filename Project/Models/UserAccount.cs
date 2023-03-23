@@ -1,5 +1,3 @@
-﻿using Microsoft.AspNetCore.Identity;
-
-namespace Project.Models;
+﻿namespace Project.Models;
 
 public class UserAccount : Account { }

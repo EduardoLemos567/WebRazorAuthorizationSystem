@@ -19,8 +19,8 @@ public class CreateModel : PageModel
         {
             return this.Page();
         }
-        _ = this.db.Movies.Add(this.Movie);
-        _ = await this.db.SaveChangesAsync();
+        this.db.Movies.Add(this.Movie);
+        await this.db.SaveChangesAsync();
         return this.RedirectToPage("./Index");
     }
 }

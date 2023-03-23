@@ -38,7 +38,7 @@ public class EditModel : PageModel
         this.db.Attach(this.Movie).State = EntityState.Modified;
         try
         {
-            _ = await this.db.SaveChangesAsync();
+            await this.db.SaveChangesAsync();
         }
         catch (DbUpdateConcurrencyException)
         {

@@ -23,12 +23,12 @@ public class DataSeeder
         if (this.db.MovieCategories.Any()) { return; }
         foreach (var i in Enumerable.Range(0, 10))
         {
-            _ = this.db.Add(new MovieCategory()
+            this.db.Add(new MovieCategory()
             {
                 Name = $"MovieCategory {i + 1}"
             });
         }
-        _ = this.db.SaveChanges();
+        this.db.SaveChanges();
     }
     public void SeedMovies()
     {
@@ -36,14 +36,14 @@ public class DataSeeder
         var categories = this.db.MovieCategories.ToList();
         foreach (var i in Enumerable.Range(0, 20))
         {
-            _ = this.db.Add(new Movie()
+            this.db.Add(new Movie()
             {
                 Name = $"Movie {i + 1}",
                 ReleaseDate = new(this.rng.Next(1900, 2024), this.rng.Next(1, 13), this.rng.Next(1, 31)),
                 Category = categories[this.rng.Next(categories.Count)],
             });
         }
-        _ = this.db.SaveChanges();
+        this.db.SaveChanges();
     }
     public void SeedUserAccounts()
     {
