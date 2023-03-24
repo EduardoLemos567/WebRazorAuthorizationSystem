@@ -6,7 +6,7 @@ using System.Security.Claims;
 
 namespace Project.Login;
 
-public class AuthenticationService<TUser> where TUser : IdentityUser<int>
+public class AuthenticationService<TUser> where TUser : AAccount
 {
     private const bool LOCKOUT_ON_FAILURE = true;
     public class LoginDetails

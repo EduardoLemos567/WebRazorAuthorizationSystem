@@ -5,11 +5,10 @@ using Project.Models;
 
 namespace Project.Login;
 
-public class UserStore<TUser>
-    : UserStore<TUser, StaffRole, DataContext, int>
-    where TUser : AAccount
+public class RoleStore
+    : RoleStore<StaffRole, DataContext, int>
 {
-    public UserStore(DataContext context,
+    public RoleStore(DataContext context,
                      IdentityErrorDescriber? describer = null)
         : base(context, describer) { }
 }

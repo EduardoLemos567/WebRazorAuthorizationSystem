@@ -3,8 +3,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Project.Models;
 
-public abstract class Account : IdentityUser<int>
+public abstract class AAccount : IdentityUser<int>
 {
-    [Required]
+    [Required, ProtectedPersonalData]
     public string? RealName { get; set; }
 }

@@ -68,7 +68,7 @@ public class DataSeeder
         }
         this.db.SaveChanges();
     }
-    private static void SeedAccount(in Account account, int index)
+    private static void SeedAccount(in AAccount account, int index)
     {
         account.UserName = $"UserName {index + 1}";
         account.RealName = $"RealName {index + 1}";

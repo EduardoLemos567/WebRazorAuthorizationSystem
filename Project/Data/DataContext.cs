@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Project.Data;
 
@@ -12,6 +13,7 @@ public class DataContext : DbContext
     public DbSet<Models.UserAccount> UserAccounts { get; set; } = default!;
     public DbSet<Models.StaffAccount> StaffAccounts { get; set; } = default!;
     public DbSet<Models.PermissionsPackage> PermissionsPackages { get; set; } = default!;
+    public DbSet<IdentityRole<int>> StaffRoles { get; set; } = default!;
     protected override void ConfigureConventions(ModelConfigurationBuilder builder) =>
         builder.Properties<DateOnly>()
             .HaveConversion<DateOnlyConverter>()

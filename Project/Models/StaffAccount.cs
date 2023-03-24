@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Project.Models;
 
-public class StaffAccount : Account
+public class StaffAccount : AAccount
 {
     [Required]
     public string? Permissions { get; set; }

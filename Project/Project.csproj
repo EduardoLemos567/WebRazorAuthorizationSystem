@@ -18,10 +18,4 @@
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.5" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Pages\Admin\UserAccount\" />
-    <Folder Include="Pages\Admin\StaffRole\" />
-    <Folder Include="Pages\Admin\StaffAccount\" />
-  </ItemGroup>
-
 </Project>
