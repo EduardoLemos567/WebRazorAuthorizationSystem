@@ -19,7 +19,7 @@ public static class Startup
         AddLoginService(services);
         services.AddSingleton<PermissionService>();
         services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-        services.AddHostedService<SetupBackgroundService>();
+        //services.AddHostedService<AddAdminBackgroundService>();
     }
     private static void AddDatabaseService(IServiceCollection services, ConfigurationManager configurator)
     {
