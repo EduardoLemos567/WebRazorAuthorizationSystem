@@ -7,8 +7,8 @@ namespace Project.Pages.Admin.Movie;
 [HasPermission(Places.Movie, Actions.Create)]
 public class CreateModel : PageModel
 {
-    private readonly Data.DataContext db;
-    public CreateModel(Data.DataContext context) => this.db = context;
+    private readonly Data.DataDbContext db;
+    public CreateModel(Data.DataDbContext context) => this.db = context;
     public IActionResult OnGet() => this.Page();
     [BindProperty]
     public Models.Movie Movie { get; set; } = default!;

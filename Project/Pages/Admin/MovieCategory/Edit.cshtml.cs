@@ -6,8 +6,8 @@ namespace Project.Pages.Admin.MovieCategory;
 
 public class EditModel : PageModel
 {
-    private readonly Data.DataContext db;
-    public EditModel(Data.DataContext context) => this.db = context;
+    private readonly Data.DataDbContext db;
+    public EditModel(Data.DataDbContext context) => this.db = context;
     [BindProperty]
     public Models.MovieCategory MovieCategory { get; set; } = default!;
     public async Task<IActionResult> OnGetAsync(int? id)

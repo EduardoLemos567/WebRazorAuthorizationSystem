@@ -7,6 +7,8 @@ public class StaffAccount : AAccount
 {
     [Required]
     public string? Permissions { get; set; }
+    [Required]
+    public HashSet<StaffRole> Roles { get; set; } = new();
     public IEnumerable<Permission> PermissionsList => from c in Permissions! select new Permission(c);
     public void SortPermissions()
     {

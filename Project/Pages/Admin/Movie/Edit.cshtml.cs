@@ -8,9 +8,9 @@ namespace Project.Pages.Admin.Movie;
 [HasPermission(Places.Movie, Actions.Update)]
 public class EditModel : PageModel
 {
-    private readonly Data.DataContext db;
+    private readonly Data.DataDbContext db;
 
-    public EditModel(Data.DataContext context) => this.db = context;
+    public EditModel(Data.DataDbContext context) => this.db = context;
     [BindProperty]
     public Models.Movie Movie { get; set; } = default!;
     public async Task<IActionResult> OnGetAsync(int? id)

@@ -7,8 +7,8 @@ namespace Project.Pages.Admin.StaffAccount;
 
 public class DeleteModel : PageModel
 {
-    private readonly DataContext db;
-    public DeleteModel(DataContext context)
+    private readonly DataDbContext db;
+    public DeleteModel(DataDbContext context)
     {
         db = context;
     }

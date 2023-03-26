@@ -28,16 +28,11 @@ public class AddAdminBackgroundService : IHostedService
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
     private void ExecuteInSync()
     {
-        //TODO: execute async
-    }
-    private async Task ExecuteAsync(CancellationToken cancelationToken)
-    {
-        if (cancelationToken.IsCancellationRequested) { return; }
         using (var scope = services.CreateScope())
         {
             var users = scope.ServiceProvider.GetRequiredService<UserManager<StaffAccount>>();
-            var roles = scope.ServiceProvider.GetRequiredService<IRoleStore<StaffRole>>();
-            var roleCreationResult = await roles.CreateAsync(new("Admin"), cancelationToken);
+            var roles = scope.ServiceProvider.GetRequiredService<RoleManager<StaffRole>>();
+            var roleCreationResult = roles.CreateAsync(new("Admin")).Result;
             if (!roleCreationResult.Succeeded)
             {
                 logger.LogWarning($"Couldn't create admin role, error: {string.Join(',', from e in roleCreationResult.Errors select e.Description)}");
@@ -50,12 +45,12 @@ public class AddAdminBackgroundService : IHostedService
                 Permissions = new((from p in permissions.AllPermissions select p.data).ToArray())
             };
             admin.SortPermissions();
-            var userCreationResult = await users.CreateAsync(admin, "Admin1&");
+            var userCreationResult = users.CreateAsync(admin, "Admin1&").Result;
             if (!userCreationResult.Succeeded)
             {
                 logger.LogWarning($"Couldn't create admin user, error: {string.Join(',', from e in userCreationResult.Errors select e.Description)}");
             }
-            var addToRoleResult = await users.AddToRoleAsync(admin, "Admin");
+            var addToRoleResult = users.AddToRoleAsync(admin, "Admin").Result;
             if (!addToRoleResult.Succeeded)
             {
                 logger.LogWarning($"Couldn't add admin user to admin role, error: {string.Join(',', from e in addToRoleResult.Errors select e.Description)}");

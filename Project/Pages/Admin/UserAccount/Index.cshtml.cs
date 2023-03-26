@@ -6,8 +6,8 @@ namespace Project.Pages.Admin.UserAccount;
 
 public class IndexModel : PageModel
 {
-    private readonly DataContext db;
-    public IndexModel(DataContext context)
+    private readonly DataDbContext db;
+    public IndexModel(DataDbContext context)
     {
         db = context;
     }

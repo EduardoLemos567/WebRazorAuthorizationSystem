@@ -7,8 +7,8 @@ namespace Project.Pages.Admin.PermissionsPackage;
 
 public class EditModel : PageModel
 {
-    private readonly DataContext db;
-    public EditModel(DataContext context)
+    private readonly DataDbContext db;
+    public EditModel(DataDbContext context)
     {
         db = context;
     }

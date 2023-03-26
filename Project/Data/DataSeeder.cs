@@ -4,9 +4,9 @@ namespace Project.Data;
 
 public class DataSeeder
 {
-    private readonly DataContext db;
+    private readonly DataDbContext db;
     private readonly Random rng;
-    public DataSeeder(DataContext db)
+    public DataSeeder(DataDbContext db)
     {
         this.db = db;
         this.rng = new Random(1234);

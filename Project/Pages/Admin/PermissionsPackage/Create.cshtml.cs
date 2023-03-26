@@ -6,8 +6,8 @@ namespace Project.Pages.Admin.PermissionsPackage;
 
 public class CreateModel : PageModel
 {
-    private readonly DataContext db;
-    public CreateModel(DataContext context)
+    private readonly DataDbContext db;
+    public CreateModel(DataDbContext context)
     {
         db = context;
     }

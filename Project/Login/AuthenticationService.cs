@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Project.Models;
 using System.ComponentModel.DataAnnotations;
@@ -151,12 +152,4 @@ public class AuthenticationService<TUser> where TUser : AAccount
     {
         return !Validator.TryValidateObject(login, new ValidationContext(login), null);
     }
-    private static void ThrowIfNull(in TUser? user)
-    {
-        if (user is null)
-        {
-            throw new ArgumentNullException(nameof(user));
-        }
-    }
-
 }

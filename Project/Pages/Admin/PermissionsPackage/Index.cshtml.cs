@@ -6,9 +6,9 @@ namespace Project.Pages.Admin.PermissionsPackage;
 
 public class IndexModel : PageModel
 {
-    private readonly DataContext _context;
+    private readonly DataDbContext _context;
 
-    public IndexModel(DataContext context)
+    public IndexModel(DataDbContext context)
     {
         _context = context;
     }

@@ -8,8 +8,8 @@ namespace Project.Pages.Admin.Movie;
 [HasPermission(Places.Movie, Actions.Delete)]
 public class DeleteModel : PageModel
 {
-    private readonly Data.DataContext db;
-    public DeleteModel(Data.DataContext context) => this.db = context;
+    private readonly Data.DataDbContext db;
+    public DeleteModel(Data.DataDbContext context) => this.db = context;
     [BindProperty]
     public Models.Movie Movie { get; set; } = default!;
     public async Task<IActionResult> OnGetAsync(int? id)

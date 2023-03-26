@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Project.Data;
 using Project.Login;
 using Project.Models;
@@ -18,29 +19,26 @@ public static class Startup
         AddDatabaseService(services, configurator);
         AddLoginService(services);
         services.AddSingleton<PermissionService>();
-        services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         //services.AddHostedService<AddAdminBackgroundService>();
     }
     private static void AddDatabaseService(IServiceCollection services, ConfigurationManager configurator)
     {
-        services.AddDbContext<DataContext>(o =>
+        services.AddDbContext<DataDbContext>(o =>
             o.UseSqlite(
                 configurator.GetConnectionString("DataContextPath") ??
                 throw new InvalidOperationException("Connection string 'DataContextPath' not found.")));
     }
     private static void AddLoginService(IServiceCollection services)
     {
-        IdentityBuilder BuildIdentity<TAccount>() where TAccount : AAccount
+        void BuildIdentity<TAccount>() where TAccount : AAccount
         {
-            services.AddScoped<AuthenticationService<TAccount>>();
-            services.AddScoped<IUserStore<TAccount>, UserStore<TAccount>>();
-            services.AddScoped<SignInManager<TAccount>>();
-            return services.AddIdentityCore<TAccount>(AddIdentityOptions);
+            services.AddScoped<AuthenticationService<TAccount>>()
+                .AddScoped<UserStore<TAccount>>()
+                .AddScoped<SignInManager<TAccount>>();
         }
         BuildIdentity<UserAccount>();
-        BuildIdentity<StaffAccount>()
-            .AddRoles<StaffRole>();
-        services.AddScoped<IRoleStore<StaffRole>, RoleStore>();
+        BuildIdentity<StaffAccount>();
+        services.Configure<IdentityOptions>(AddIdentityOptions);
         services.ConfigureApplicationCookie(AddCookieAuthenticationOptions);
     }
     #region OPTIONS
@@ -79,7 +77,7 @@ public static class Startup
     {
         using (var scope = services.CreateScope())
         {
-            using (var db = new DataContext(scope.ServiceProvider.GetRequiredService<DbContextOptions<DataContext>>()))
+            using (var db = new DataDbContext(scope.ServiceProvider.GetRequiredService<DbContextOptions<DataDbContext>>()))
             {
                 var seeder = new DataSeeder(db);
                 seeder.SeedAllModels();
