@@ -1,4 +1,4 @@
-﻿namespace Project.Permissions;
+﻿namespace Project.Requirements;
 
 public readonly struct Permission
 {

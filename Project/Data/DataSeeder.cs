@@ -1,22 +1,28 @@
-﻿using Project.Models;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Project.Models;
 
 namespace Project.Data;
 
-public class DataSeeder
+public class DataSeeder : IDisposable
 {
     private readonly DataDbContext db;
+    private readonly UserManager<Identity> users;
+    private readonly RoleManager<Role> roles;
+    private readonly ILogger<DataSeeder> logger;
     private readonly Random rng;
-    public DataSeeder(DataDbContext db)
+    public DataSeeder(IServiceScope scope)
     {
-        this.db = db;
+        db = new DataDbContext(scope.ServiceProvider.GetRequiredService<DbContextOptions<DataDbContext>>());
+        users = scope.ServiceProvider.GetRequiredService<UserManager<Identity>>();
+        roles = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
+        logger = scope.ServiceProvider.GetRequiredService<ILogger<DataSeeder>>();
         this.rng = new Random(1234);
     }
     public void SeedAllModels()
     {
         this.SeedMovieCategories();
         this.SeedMovies();
-        this.SeedUserAccounts();
-        this.SeedStaffAccounts();
     }
     public void SeedMovieCategories()
     {
@@ -45,33 +51,5 @@ public class DataSeeder
         }
         this.db.SaveChanges();
     }
-    public void SeedUserAccounts()
-    {
-        if (this.db.UserAccounts.Any()) { return; }
-        foreach (var i in Enumerable.Range(0, 20))
-        {
-            var user = new UserAccount();
-            SeedAccount(user, i);
-            this.db.Add(user);
-        }
-        this.db.SaveChanges();
-    }
-    public void SeedStaffAccounts()
-    {
-        if (this.db.StaffAccounts.Any()) { return; }
-        foreach (var i in Enumerable.Range(0, 20))
-        {
-            var staff = new StaffAccount();
-            SeedAccount(staff, i);
-            staff.Permissions = string.Empty;
-            this.db.Add(staff);
-        }
-        this.db.SaveChanges();
-    }
-    private static void SeedAccount(in AAccount account, int index)
-    {
-        account.UserName = $"UserName {index + 1}";
-        account.RealName = $"RealName {index + 1}";
-        account.Email = $"email{index + 1}@email.com";
-    }
+    public void Dispose() => db.Dispose();
 }

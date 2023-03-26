@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
-using Project.Permissions;
+using Project.Requirements;
 
 namespace Project.Pages;
 
-[HasPermission(Places.Movie, Actions.Create)]
 public class IndexModel : PageModel
 {
     private readonly ILogger<IndexModel> logger;

@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Project.Permissions;
+using Project.Requirements;
 
 namespace Project.Pages.Admin.Movie;
 
-[HasPermission(Places.Movie, Actions.Delete)]
+[RequirePermission(Places.Movie, Actions.Delete)]
 public class DeleteModel : PageModel
 {
     private readonly Data.DataDbContext db;

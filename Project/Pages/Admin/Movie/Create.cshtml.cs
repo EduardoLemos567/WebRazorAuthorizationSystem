@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Project.Permissions;
+using Project.Requirements;
 
 namespace Project.Pages.Admin.Movie;
 
-[HasPermission(Places.Movie, Actions.Create)]
+[RequirePermission(Places.Movie, Actions.Create)]
 public class CreateModel : PageModel
 {
     private readonly Data.DataDbContext db;

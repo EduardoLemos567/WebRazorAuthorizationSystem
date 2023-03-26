@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Project.Permissions;
+using Project.Requirements;
 
 namespace Project.Pages.Admin.Movie;
 
-[HasPermission(Places.Movie, Actions.List)]
+[RequirePermission(Places.Movie, Actions.List)]
 public partial class IndexModel : PageModel
 {
     private readonly Data.DataDbContext db;

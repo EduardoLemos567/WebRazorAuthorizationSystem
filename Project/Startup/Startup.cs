@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Project.Data;
-using Project.Login;
 using Project.Models;
-using Project.Permissions;
+using Project.Requirements;
 
 namespace Project.Startup;
 
@@ -18,8 +17,6 @@ public static class Startup
         services.AddRazorPages();
         AddDatabaseService(services, configurator);
         AddLoginService(services);
-        services.AddSingleton<PermissionService>();
-        //services.AddHostedService<AddAdminBackgroundService>();
     }
     private static void AddDatabaseService(IServiceCollection services, ConfigurationManager configurator)
     {
@@ -30,15 +27,9 @@ public static class Startup
     }
     private static void AddLoginService(IServiceCollection services)
     {
-        void BuildIdentity<TAccount>() where TAccount : AAccount
-        {
-            services.AddScoped<AuthenticationService<TAccount>>()
-                .AddScoped<UserStore<TAccount>>()
-                .AddScoped<SignInManager<TAccount>>();
-        }
-        BuildIdentity<UserAccount>();
-        BuildIdentity<StaffAccount>();
-        services.Configure<IdentityOptions>(AddIdentityOptions);
+        services.AddIdentity<Identity, Role>(AddIdentityOptions)
+            .AddUserStore<UserStore<Identity, Role, DataDbContext, int>>()
+            .AddRoleStore<RoleStore<Role, DataDbContext, int>>();
         services.ConfigureApplicationCookie(AddCookieAuthenticationOptions);
     }
     #region OPTIONS
@@ -59,7 +50,7 @@ public static class Startup
         // User settings.
         options.User.AllowedUserNameCharacters =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-        options.User.RequireUniqueEmail = true;
+        options.User.RequireUniqueEmail = true;        
     }
     private static void AddCookieAuthenticationOptions(CookieAuthenticationOptions options)
     {
@@ -73,13 +64,84 @@ public static class Startup
     #endregion OPTIONS
     #endregion BEFORE_BUILD
     #region AFTER_BUILD
+    public static void AddInitialData(WebApplication app)
+    {
+        using (var scope = app.Services.CreateScope())
+        {
+            var roles = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
+            var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("AddInitialData");
+
+            logger.LogInformation($"All found required permissions: {string.Join(',', from p in Requirements.Requirements.AllRequiredPermissions() select p.ToString())}");
+
+            // If any of default roles doesnt exist in Roles, we recreate all, skipping the already created.
+            var defaultRoles = Enum.GetNames<DefaultRoles>();
+            if (defaultRoles.Except(from r in roles.Roles select r.Name).Any())
+            {
+                // Create all default roles
+                foreach (var defaultRole in defaultRoles)
+                {
+                    if (LogFail(logger,
+                               roles.CreateAsync(new(defaultRole)).Result,
+                               $"Could not create default role '{defaultRole}'"))
+                    {
+                        continue;
+                    }
+                }
+            }
+            {
+                // Get admin role
+                var adminRole = roles.FindByNameAsync(DefaultRoles.Admin.ToString()).Result;
+                if (adminRole is null)
+                {
+                    logger.LogWarning("Could not find admin role");
+                    return;
+                }
+                // Add all permissions as claim to admin role
+                if (LogFail(logger,
+                            roles.AddClaimAsync(
+                                adminRole!,
+                                new(Requirements.Requirements.PERMISSIONS_CLAIM_TYPE,
+                                    Requirements.Requirements.AllRequiredPermissionsString())
+                            ).Result,
+                            "Could not add all permissions to admin role"))
+                {
+                    return;
+                }
+            }
+            // Create admin identity
+            var users = scope.ServiceProvider.GetRequiredService<UserManager<Identity>>();
+            if (users.FindByNameAsync("Admin").Result is not null)
+            {
+                logger.LogInformation("Admin was already created.");
+                return;
+            }
+            var identity = new Identity
+            {
+                UserName = "Admin",
+                Email = "admin@admin.com",
+            };
+            if (LogFail(logger,
+                        users.CreateAsync(identity, "Admin1&").Result,
+                        "Could not create admin identity"))
+            {
+                return;
+            }
+            // Add admin identity to admin role
+            if (LogFail(logger,
+                        users.AddToRoleAsync(identity, DefaultRoles.Admin.ToString()).Result,
+                        "Could not add admin identity to admin role"))
+            {
+                return;
+            }
+            logger.LogInformation("Admin user created.");
+        }
+    }
     public static void SetupSeedData(IServiceProvider services)
     {
         using (var scope = services.CreateScope())
         {
-            using (var db = new DataDbContext(scope.ServiceProvider.GetRequiredService<DbContextOptions<DataDbContext>>()))
+            using (var seeder = new DataSeeder(scope))
             {
-                var seeder = new DataSeeder(db);
                 seeder.SeedAllModels();
             }
         }
@@ -97,8 +159,13 @@ public static class Startup
         app.UseHttpsRedirection();
         app.UseStaticFiles();
         app.UseRouting();
-        app.UseMiddleware<PermissionsMiddleWare>();
         app.MapRazorPages();
     }
     #endregion AFTER_BUILD
+    private static bool LogFail(ILogger logger, IdentityResult result, string msg)
+    {
+        if (result.Succeeded) { return false; }
+        logger.LogWarning($"{msg}, reason: {string.Join(',', from e in result.Errors select e.Description)}");
+        return true;
+    }
 }
