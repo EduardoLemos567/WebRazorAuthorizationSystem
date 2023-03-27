@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
-using Project.Requirements;
+using Project.Authorization;
 
 namespace Project.Pages;
 

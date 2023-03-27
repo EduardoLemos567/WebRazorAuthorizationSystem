@@ -20,12 +20,33 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-page="/Movie/Index">Movies</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-page="/MovieCategory/Index">Movies Categories</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
                         </li>
+                        @if ((Context.User.Identity?.IsAuthenticated ?? false)
+                        && Context.User.IsInRole(Authorization.DefaultRoles.Staff.ToString()))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-page="/Admin/Index">Admin</a>
+                            </li>
+                        }
                     </ul>
+                </div>
+                <div class="d-sm-inline-flex justify-content-end">
+                    @if (Context.User.Identity?.IsAuthenticated ?? false)
+                    {
+                        <div>@Context.User.Identity.Name</div>
+                        <a class="nav-link text-dark" asp-area="" asp-page="/Login/Logout">Logout</a>
+                    }
+                    else
+                    {
+                        <a class="nav-link text-dark" asp-area="" asp-page="/Login/Index">Login</a>
+                    }
                 </div>
             </div>
         </nav>

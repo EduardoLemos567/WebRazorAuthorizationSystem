@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Project.Data;
 using Project.Models;
-using Project.Requirements;
+using Project.Authorization;
 
 namespace Project.Startup;
 
@@ -30,7 +30,7 @@ public static class Startup
         services.AddIdentity<Identity, Role>(AddIdentityOptions)
             .AddUserStore<UserStore<Identity, Role, DataDbContext, int>>()
             .AddRoleStore<RoleStore<Role, DataDbContext, int>>();
-        services.ConfigureApplicationCookie(AddCookieAuthenticationOptions);
+        services.ConfigureApplicationCookie(AddCookieAuthenticationOptions);        
     }
     #region OPTIONS
     private static void AddIdentityOptions(IdentityOptions options)
@@ -50,15 +50,16 @@ public static class Startup
         // User settings.
         options.User.AllowedUserNameCharacters =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-        options.User.RequireUniqueEmail = true;        
+        options.User.RequireUniqueEmail = true;
     }
     private static void AddCookieAuthenticationOptions(CookieAuthenticationOptions options)
     {
         // Cookie settings
         options.Cookie.HttpOnly = true;
         options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
-        options.LoginPath = "/Identity/Account/Login";
-        options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+        options.LoginPath = "/Login/Index";
+        options.AccessDeniedPath = "/Login/AccessDenied";
+        options.LogoutPath = "/Login/Logout";
         options.SlidingExpiration = true;
     }
     #endregion OPTIONS
@@ -71,7 +72,7 @@ public static class Startup
             var roles = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
             var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("AddInitialData");
 
-            logger.LogInformation($"All found required permissions: {string.Join(',', from p in Requirements.Requirements.AllRequiredPermissions() select p.ToString())}");
+            logger.LogDebug($"All found required permissions: {string.Join(',', from p in Authorization.Requirements.AllRequiredPermissions() select p.ToString())}");
 
             // If any of default roles doesnt exist in Roles, we recreate all, skipping the already created.
             var defaultRoles = Enum.GetNames<DefaultRoles>();
@@ -100,8 +101,8 @@ public static class Startup
                 if (LogFail(logger,
                             roles.AddClaimAsync(
                                 adminRole!,
-                                new(Requirements.Requirements.PERMISSIONS_CLAIM_TYPE,
-                                    Requirements.Requirements.AllRequiredPermissionsString())
+                                new(Requirements.PERMISSIONS_CLAIM_TYPE,
+                                    Requirements.AllRequiredPermissionsString())
                             ).Result,
                             "Could not add all permissions to admin role"))
                 {
@@ -126,10 +127,20 @@ public static class Startup
             {
                 return;
             }
-            // Add admin identity to admin role
+            // Validates email
+            var userStore = scope.ServiceProvider.GetRequiredService<IUserStore<Identity>>();
+            (userStore as IUserEmailStore<Identity>)!.SetEmailConfirmedAsync(identity, true, default).Wait();
+            // Add admin identity to Admin role
             if (LogFail(logger,
                         users.AddToRoleAsync(identity, DefaultRoles.Admin.ToString()).Result,
                         "Could not add admin identity to admin role"))
+            {
+                return;
+            }
+            // Also add to Staff role
+            if (LogFail(logger,
+                        users.AddToRoleAsync(identity, DefaultRoles.Staff.ToString()).Result,
+                        "Could not add admin identity to staff role"))
             {
                 return;
             }
@@ -159,6 +170,7 @@ public static class Startup
         app.UseHttpsRedirection();
         app.UseStaticFiles();
         app.UseRouting();
+        app.UseAuthorization();
         app.MapRazorPages();
     }
     #endregion AFTER_BUILD

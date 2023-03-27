@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Project.Requirements;
+using Project.Authorization;
 
 namespace Project.Pages.Admin.Movie;
 
