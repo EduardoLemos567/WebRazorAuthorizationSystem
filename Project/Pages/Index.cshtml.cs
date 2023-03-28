@@ -1,14 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc.RazorPages;
-using Project.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace Project.Pages;
 
 public class IndexModel : PageModel
 {
-    private readonly ILogger<IndexModel> logger;
-    public IndexModel(ILogger<IndexModel> logger) => this.logger = logger;
-    public void OnGet()
-    {
-
-    }
+    private readonly Data.DataDbContext db;
+    public IndexModel(Data.DataDbContext context) => this.db = context;
+    public IList<Models.Movie> Movies { get; set; } = default!;
+    public async Task OnGetAsync() => this.Movies = await this.db.Movies.Include(movie => movie.Category).ToListAsync();
 }

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Options;
 using Project.Models;
 
-namespace Project.Pages.Login;
+namespace Project.Pages.Account;
 
 public class LoginModel : PageModel
 {

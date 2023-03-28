@@ -35,7 +35,7 @@ public static class Startup
     #region OPTIONS
     private static void AddIdentityOptions(IdentityOptions options)
     {
-        options.SignIn.RequireConfirmedAccount = true;
+        options.SignIn.RequireConfirmedAccount = false; // TODO: for testing, we dont need to confirm account.
         // Password settings.
         options.Password.RequireDigit = true;
         options.Password.RequireLowercase = true;
@@ -57,9 +57,9 @@ public static class Startup
         // Cookie settings
         options.Cookie.HttpOnly = true;
         options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
-        options.LoginPath = "/Login/Index";
-        options.AccessDeniedPath = "/Login/AccessDenied";
-        options.LogoutPath = "/Login/Logout";
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.LogoutPath = "/Account/Logout";
         options.SlidingExpiration = true;
     }
     #endregion OPTIONS
@@ -127,9 +127,6 @@ public static class Startup
             {
                 return;
             }
-            // Validates email
-            var userStore = scope.ServiceProvider.GetRequiredService<IUserStore<Identity>>();
-            (userStore as IUserEmailStore<Identity>)!.SetEmailConfirmedAsync(identity, true, default).Wait();
             // Add admin identity to Admin role
             if (LogFail(logger,
                         users.AddToRoleAsync(identity, DefaultRoles.Admin.ToString()).Result,

@@ -1,0 +1,55 @@
+﻿@page
+@model Project.Pages.Account.CreateModel
+@{
+}
+
+<h1>Create</h1>
+
+<h4>Account</h4>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="AccountInfo.Email" class="control-label"></label>
+                <input asp-for="AccountInfo.Email" class="form-control" />
+                <span asp-validation-for="AccountInfo.Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AccountInfo.UserName" class="control-label"></label>
+                <input asp-for="AccountInfo.UserName" class="form-control" />
+                <span asp-validation-for="AccountInfo.UserName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AccountInfo.Alias" class="control-label"></label>
+                <input asp-for="AccountInfo.Alias" class="form-control" />
+                <span asp-validation-for="AccountInfo.Alias" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AccountInfo.PhoneNumber" class="control-label"></label>
+                <input asp-for="AccountInfo.PhoneNumber" class="form-control" />
+                <span asp-validation-for="AccountInfo.PhoneNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="AccountInfo.Password" class="control-label"></label>
+                <input asp-for="AccountInfo.Password" class="form-control" />
+                <span asp-validation-for="AccountInfo.Password" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

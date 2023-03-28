@@ -9,7 +9,6 @@ public class CreateModel : PageModel
 {
     private readonly Data.DataDbContext db;
     public CreateModel(Data.DataDbContext context) => this.db = context;
-    public IActionResult OnGet() => this.Page();
     [BindProperty]
     public Models.Movie Movie { get; set; } = default!;
     // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD

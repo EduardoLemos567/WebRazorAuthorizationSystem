@@ -1,0 +1,7 @@
+﻿@page
+@model Project.Pages.Movie.WatchModel
+@{
+    ViewData["Title"] = $"Movie - {Html.DisplayFor(model => model.Movie.Name)}";
+}
+<br />
+<h4>You are now watching the movie: @Html.DisplayFor(model => model.Movie.Name)</h4>

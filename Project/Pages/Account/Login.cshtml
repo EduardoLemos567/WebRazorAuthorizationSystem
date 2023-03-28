@@ -1,5 +1,5 @@
 ﻿@page
-@model Project.Pages.Login.LoginModel
+@model Project.Pages.Account.LoginModel
 @{
     ViewData["Title"] = "Login";
 }
@@ -35,3 +35,9 @@
 <div>
     <a asp-page="./Index">Back to List</a>
 </div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

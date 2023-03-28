@@ -5,9 +5,9 @@ public enum Places : short
     NoPlace,
     Movie,
     MovieCategory,
-    UserAccount,
-    StaffAccount,
-    StaffRole,
+    Identity,
+    Role,
+    Permission,
     // Max 8191 options = 13 bits
 }
 

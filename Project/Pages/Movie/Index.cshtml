@@ -1,7 +1,8 @@
 ﻿@page
-@model Project.Pages.IndexModel
+@model Project.Pages.Movie.IndexModel
+
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Movie";
 }
 <br />
 <h1>Movies</h1>
@@ -38,7 +39,7 @@
                     <a asp-page="/Category/View" asp-route-id="@item.Category!.Id">View Category</a>
                 </td>
                 <td>
-                    <a asp-page="/Movie/Watch" asp-route-id="@item.Id">Watch</a>
+                    <a asp-page="./Watch" asp-route-id="@item.Id">Watch</a>
                 </td>
             </tr>
         }

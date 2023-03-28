@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Project.Models;
 
-namespace Project.Pages.Login;
+namespace Project.Pages.Account;
 
 [Authorize]
 public class LogoutModel : PageModel
@@ -21,6 +21,6 @@ public class LogoutModel : PageModel
         logger.LogDebug("Logging out...");
         await signor.SignOutAsync();
         logger.LogDebug("Logged out, redirecting...");
-        return RedirectToPage("/Login/Index");
+        return RedirectToPage("/Account/Login");
     }
 }
