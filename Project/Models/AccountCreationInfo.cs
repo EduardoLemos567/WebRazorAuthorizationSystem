@@ -6,7 +6,7 @@ public class AccountCreationInfo
 {
     [Required, DataType(DataType.EmailAddress)]
     public string? Email { get; set; } = default!;
-    [Required, Display(Name ="Full Name")]
+    [Required, Display(Name = "Full Name")]
     public string? UserName { get; set; } = default!;
     public string? Alias { get; set; } = default!;
     [Required, DataType(DataType.Password)]

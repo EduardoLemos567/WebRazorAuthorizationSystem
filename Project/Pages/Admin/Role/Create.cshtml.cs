@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Project.Data;
 
-namespace Project.Pages.Admin.Movie;
+namespace Project.Pages.Admin.Role;
 
 public class CreateModel : PageModel
 {
@@ -19,17 +19,17 @@ public class CreateModel : PageModel
     }
 
     [BindProperty]
-    public Models.Movie Movie { get; set; } = default!;
+    public Models.Role Role { get; set; } = default!;
 
     // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
     public async Task<IActionResult> OnPostAsync()
     {
-        if (!ModelState.IsValid || _context.Movies == null || Movie == null)
+        if (!ModelState.IsValid || _context.Roles == null || Role == null)
         {
             return Page();
         }
 
-        _context.Movies.Add(Movie);
+        _context.Roles.Add(Role);
         await _context.SaveChangesAsync();
 
         return RedirectToPage("./Index");

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Project.Data;
 
-namespace Project.Pages.Admin.Movie;
+namespace Project.Pages.Admin.Role;
 
 public class EditModel : PageModel
 {
@@ -15,21 +15,21 @@ public class EditModel : PageModel
     }
 
     [BindProperty]
-    public Models.Movie Movie { get; set; } = default!;
+    public Models.Role Role { get; set; } = default!;
 
     public async Task<IActionResult> OnGetAsync(int? id)
     {
-        if (id == null || _context.Movies == null)
+        if (id == null || _context.Roles == null)
         {
             return NotFound();
         }
 
-        var movie = await _context.Movies.FirstOrDefaultAsync(m => m.Id == id);
-        if (movie == null)
+        var role = await _context.Roles.FirstOrDefaultAsync(m => m.Id == id);
+        if (role == null)
         {
             return NotFound();
         }
-        Movie = movie;
+        Role = role;
         return Page();
     }
 
@@ -42,7 +42,7 @@ public class EditModel : PageModel
             return Page();
         }
 
-        _context.Attach(Movie).State = EntityState.Modified;
+        _context.Attach(Role).State = EntityState.Modified;
 
         try
         {
@@ -50,7 +50,7 @@ public class EditModel : PageModel
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!MovieExists(Movie.Id))
+            if (!RoleExists(Role.Id))
             {
                 return NotFound();
             }
@@ -63,8 +63,8 @@ public class EditModel : PageModel
         return RedirectToPage("./Index");
     }
 
-    private bool MovieExists(int id)
+    private bool RoleExists(int id)
     {
-        return (_context.Movies?.Any(e => e.Id == id)).GetValueOrDefault();
+        return (_context.Roles?.Any(e => e.Id == id)).GetValueOrDefault();
     }
 }

@@ -2,5 +2,24 @@
 @model Project.Pages.Admin.IndexModel
 @{
 }
-
+<br>
 Welcome Admin
+<br>
+<table class="table">
+    <tbody>
+        <tr>
+            <td>
+                <a asp-page="./Identity/Index">Identity</a>
+            </td>
+            <td>
+                <a asp-page="./Movie/Index">Movie</a>
+            </td>
+            <td>
+                <a asp-page="./MovieCategory/Index">MovieCategory</a>
+            </td>
+            <td>
+                <a asp-page="./Role/Index">Role</a>
+            </td>
+        </tr>
+    </tbody>
+</table>

@@ -1,11 +1,13 @@
 ﻿@page
-@model Project.Pages.Account.CreateModel
+@model Project.Pages.Admin.Identity.CreateModel
+
 @{
+    ViewData["Title"] = "Create";
 }
-<br>
+
 <h1>Create</h1>
-<br>
-<h4>Account</h4>
+
+<h4>Identity</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -48,7 +50,5 @@
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

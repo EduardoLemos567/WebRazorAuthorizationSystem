@@ -1,54 +1,70 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Project.Data;
 
 namespace Project.Pages.Admin.MovieCategory;
 
 public class EditModel : PageModel
 {
-    private readonly Data.DataDbContext db;
-    public EditModel(Data.DataDbContext context) => this.db = context;
+    private readonly DataDbContext _context;
+
+    public EditModel(DataDbContext context)
+    {
+        _context = context;
+    }
+
     [BindProperty]
     public Models.MovieCategory MovieCategory { get; set; } = default!;
+
     public async Task<IActionResult> OnGetAsync(int? id)
     {
-        if (id == null || this.db.MovieCategories == null)
+        if (id == null || _context.MovieCategories == null)
         {
-            return this.NotFound();
+            return NotFound();
         }
-        var moviecategory = await this.db.MovieCategories.FirstOrDefaultAsync(m => m.Id == id);
+
+        var moviecategory = await _context.MovieCategories.FirstOrDefaultAsync(m => m.Id == id);
         if (moviecategory == null)
         {
-            return this.NotFound();
+            return NotFound();
         }
-        this.MovieCategory = moviecategory;
-        return this.Page();
+        MovieCategory = moviecategory;
+        return Page();
     }
+
     // To protect from overposting attacks, enable the specific properties you want to bind to.
     // For more details, see https://aka.ms/RazorPagesCRUD.
     public async Task<IActionResult> OnPostAsync()
     {
-        if (!this.ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
-            return this.Page();
+            return Page();
         }
-        this.db.Attach(this.MovieCategory).State = EntityState.Modified;
+
+        _context.Attach(MovieCategory).State = EntityState.Modified;
+
         try
         {
-            await this.db.SaveChangesAsync();
+            await _context.SaveChangesAsync();
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!MovieCategoryExists(this.MovieCategory.Id))
+            if (!MovieCategoryExists(MovieCategory.Id))
             {
-                return this.NotFound();
+                return NotFound();
             }
             else
             {
                 throw;
             }
         }
-        return this.RedirectToPage("./Index");
+
+        return RedirectToPage("./Index");
     }
-    private bool MovieCategoryExists(int id) => (this.db.MovieCategories?.Any(e => e.Id == id)).GetValueOrDefault();
+
+    private bool MovieCategoryExists(int id)
+    {
+        return (_context.MovieCategories?.Any(e => e.Id == id)).GetValueOrDefault();
+    }
 }

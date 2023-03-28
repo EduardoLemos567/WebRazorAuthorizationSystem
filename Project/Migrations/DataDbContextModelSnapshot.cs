@@ -198,8 +198,9 @@ namespace Project.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("ReleaseDate")
-                        .HasColumnType("date");
+                    b.Property<string>("ReleaseDate")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 

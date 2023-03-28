@@ -7,16 +7,10 @@ namespace Project.Data;
 public class DataSeeder : IDisposable
 {
     private readonly DataDbContext db;
-    private readonly UserManager<Identity> users;
-    private readonly RoleManager<Role> roles;
-    private readonly ILogger<DataSeeder> logger;
     private readonly Random rng;
     public DataSeeder(IServiceScope scope)
     {
         db = new DataDbContext(scope.ServiceProvider.GetRequiredService<DbContextOptions<DataDbContext>>());
-        users = scope.ServiceProvider.GetRequiredService<UserManager<Identity>>();
-        roles = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
-        logger = scope.ServiceProvider.GetRequiredService<ILogger<DataSeeder>>();
         this.rng = new Random(1234);
     }
     public void SeedAllModels()
@@ -51,5 +45,9 @@ public class DataSeeder : IDisposable
         }
         this.db.SaveChanges();
     }
-    public void Dispose() => db.Dispose();
+    public void Dispose()
+    {
+        db.Dispose();
+        GC.SuppressFinalize(this);
+    }
 }

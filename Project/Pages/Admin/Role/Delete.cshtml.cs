@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Project.Data;
 
-namespace Project.Pages.Admin.Movie;
+namespace Project.Pages.Admin.Role;
 
 public class DeleteModel : PageModel
 {
@@ -15,40 +15,40 @@ public class DeleteModel : PageModel
     }
 
     [BindProperty]
-    public Models.Movie Movie { get; set; } = default!;
+    public Models.Role Role { get; set; } = default!;
 
     public async Task<IActionResult> OnGetAsync(int? id)
     {
-        if (id == null || _context.Movies == null)
+        if (id == null || _context.Roles == null)
         {
             return NotFound();
         }
 
-        var movie = await _context.Movies.FirstOrDefaultAsync(m => m.Id == id);
+        var role = await _context.Roles.FirstOrDefaultAsync(m => m.Id == id);
 
-        if (movie == null)
+        if (role == null)
         {
             return NotFound();
         }
         else
         {
-            Movie = movie;
+            Role = role;
         }
         return Page();
     }
 
     public async Task<IActionResult> OnPostAsync(int? id)
     {
-        if (id == null || _context.Movies == null)
+        if (id == null || _context.Roles == null)
         {
             return NotFound();
         }
-        var movie = await _context.Movies.FindAsync(id);
+        var role = await _context.Roles.FindAsync(id);
 
-        if (movie != null)
+        if (role != null)
         {
-            Movie = movie;
-            _context.Movies.Remove(Movie);
+            Role = role;
+            _context.Roles.Remove(Role);
             await _context.SaveChangesAsync();
         }
 

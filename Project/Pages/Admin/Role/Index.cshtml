@@ -1,5 +1,5 @@
 ﻿@page
-@model Project.Pages.Admin.MovieCategory.IndexModel
+@model Project.Pages.Admin.Role.IndexModel
 
 @{
     ViewData["Title"] = "Index";
@@ -14,16 +14,28 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.MovieCategories[0].Name)
+                @Html.DisplayNameFor(model => model.Roles[0].Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Roles[0].NormalizedName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Roles[0].ConcurrencyStamp)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.MovieCategories) {
+@foreach (var item in Model.Roles) {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.NormalizedName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ConcurrencyStamp)
             </td>
             <td>
                 <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |

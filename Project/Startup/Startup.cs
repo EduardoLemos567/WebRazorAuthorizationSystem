@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Project.Authorization;
 using Project.Data;
 using Project.Models;
-using Project.Authorization;
 
 namespace Project.Startup;
 
@@ -30,7 +30,7 @@ public static class Startup
         services.AddIdentity<Identity, Role>(AddIdentityOptions)
             .AddUserStore<UserStore<Identity, Role, DataDbContext, int>>()
             .AddRoleStore<RoleStore<Role, DataDbContext, int>>();
-        services.ConfigureApplicationCookie(AddCookieAuthenticationOptions);        
+        services.ConfigureApplicationCookie(AddCookieAuthenticationOptions);
     }
     #region OPTIONS
     private static void AddIdentityOptions(IdentityOptions options)
@@ -72,7 +72,7 @@ public static class Startup
             var roles = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
             var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("AddInitialData");
 
-            logger.LogDebug($"All found required permissions: {string.Join(',', from p in Authorization.Requirements.AllRequiredPermissions() select p.ToString())}");
+            logger.LogDebug("All found required permissions: {authorizations}", string.Join(',', from p in Requirements.AllRequiredPermissions() select p.ToString()));
 
             // If any of default roles doesnt exist in Roles, we recreate all, skipping the already created.
             var defaultRoles = Enum.GetNames<DefaultRoles>();
@@ -174,7 +174,7 @@ public static class Startup
     private static bool LogFail(ILogger logger, IdentityResult result, string msg)
     {
         if (result.Succeeded) { return false; }
-        logger.LogWarning($"{msg}, reason: {string.Join(',', from e in result.Errors select e.Description)}");
+        logger.LogWarning("{msg}, reason: {reasons}", msg, string.Join(',', from e in result.Errors select e.Description));
         return true;
     }
 }

@@ -1,17 +1,16 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Project.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace Project.Pages.Account;
+namespace Project.Pages.Admin.Identity;
 
 public class CreateModel : PageModel
 {
-    private readonly UserManager<Identity> users;
-    public CreateModel(UserManager<Identity> users) => this.users = users;
+    private readonly UserManager<Models.Identity> users;
+    public CreateModel(UserManager<Models.Identity> users) => this.users = users;
     [BindProperty]
-    public Identity Identity { get; set; } = default!;
+    public Models.Identity Identity { get; set; } = default!;
     [BindProperty, Required, DataType(DataType.Password)]
     public string? Password { get; set; } = default!;
     public async Task<IActionResult> OnPostAsync()

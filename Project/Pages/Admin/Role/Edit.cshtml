@@ -1,0 +1,45 @@
+﻿@page
+@model Project.Pages.Admin.Role.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Role</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Role.Id" />
+            <div class="form-group">
+                <label asp-for="Role.Name" class="control-label"></label>
+                <input asp-for="Role.Name" class="form-control" />
+                <span asp-validation-for="Role.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Role.NormalizedName" class="control-label"></label>
+                <input asp-for="Role.NormalizedName" class="form-control" />
+                <span asp-validation-for="Role.NormalizedName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Role.ConcurrencyStamp" class="control-label"></label>
+                <input asp-for="Role.ConcurrencyStamp" class="form-control" />
+                <span asp-validation-for="Role.ConcurrencyStamp" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

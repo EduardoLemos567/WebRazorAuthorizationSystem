@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Project.Data;
 
-namespace Project.Pages.Admin.Movie;
+namespace Project.Pages.Admin.Role;
 
 public class IndexModel : PageModel
 {
@@ -13,13 +13,13 @@ public class IndexModel : PageModel
         _context = context;
     }
 
-    public IList<Models.Movie> Movies { get; set; } = default!;
+    public IList<Models.Role> Roles { get; set; } = default!;
 
     public async Task OnGetAsync()
     {
-        if (_context.Movies != null)
+        if (_context.Roles != null)
         {
-            Movies = await _context.Movies.ToListAsync();
+            Roles = await _context.Roles.ToListAsync();
         }
     }
 }

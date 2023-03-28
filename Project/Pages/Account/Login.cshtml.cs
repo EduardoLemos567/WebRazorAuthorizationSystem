@@ -36,17 +36,17 @@ public class LoginModel : PageModel
         var identity = await users.FindByEmailAsync(LoginInfo.Email!);
         if (identity is null)
         {
-            logger.LogDebug($"User not found for email: {LoginInfo.Email}");
+            logger.LogDebug("User not found for email {Email}", LoginInfo.Email);
             return Unauthorized();
         }
         //TODO: bug, isPersistent is always active between sessions, true or false doesnt change.
         var signinResult = await signor.PasswordSignInAsync(identity!, LoginInfo.Password!, LoginInfo.RememberMe, LOCKOUT_ON_FAILURE);
         if (!signinResult.Succeeded)
         {
-            logger.LogDebug($"User {identity} signin failed, reason: {signinResult}.");
+            logger.LogDebug("User {identity} signin failed, reason: {signinResult}.", identity, signinResult);
             return Unauthorized();
         }
-        logger.LogDebug($"User {identity} logged in.");
+        logger.LogDebug("User {identity} logged in.", identity);
         return RedirectToPage("/Index");
     }
     private new IActionResult Unauthorized() => RedirectToPage(
