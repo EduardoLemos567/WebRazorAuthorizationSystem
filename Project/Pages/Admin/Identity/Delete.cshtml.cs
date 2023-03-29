@@ -12,7 +12,7 @@ public class DeleteModel : PageModel
     public Models.Identity Identity { get; set; } = default!;
     public async Task<IActionResult> OnGetAsync(int? id)
     {
-        if (id == null)
+        if (id is null)
         {
             return NotFound();
         }
@@ -21,15 +21,12 @@ public class DeleteModel : PageModel
         {
             return NotFound();
         }
-        else
-        {
-            Identity = result;
-        }
+        Identity = result;
         return Page();
     }
     public async Task<IActionResult> OnPostAsync(int? id)
     {
-        if (id == null)
+        if (id is null)
         {
             return NotFound();
         }
@@ -38,11 +35,8 @@ public class DeleteModel : PageModel
         {
             return NotFound();
         }
-        else
-        {
-            Identity = result;
-            await users.DeleteAsync(result);
-        }
+        Identity = result;
+        await users.DeleteAsync(result);
         return Content("User removed");
     }
 }

@@ -17,6 +17,8 @@ public static class Startup
         services.AddRazorPages();
         AddDatabaseService(services, configurator);
         AddLoginService(services);
+        // Add initial sorted permissions list as option
+        services.AddSingleton<CachedDefaultData>();
     }
     private static void AddDatabaseService(IServiceCollection services, ConfigurationManager configurator)
     {
@@ -71,8 +73,6 @@ public static class Startup
         {
             var roles = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
             var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("AddInitialData");
-
-            logger.LogDebug("All found required permissions: {authorizations}", string.Join(',', from p in Requirements.AllRequiredPermissions() select p.ToString()));
 
             // If any of default roles doesnt exist in Roles, we recreate all, skipping the already created.
             var defaultRoles = Enum.GetNames<DefaultRoles>();

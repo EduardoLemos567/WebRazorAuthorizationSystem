@@ -1,57 +1,48 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
+using Project.Authorization;
 using Project.Data;
 
 namespace Project.Pages.Admin.MovieCategory;
 
+[RequirePermission(Places.MovieCategory, Actions.Delete)]
 public class DeleteModel : PageModel
 {
-    private readonly DataDbContext _context;
-
+    private readonly DataDbContext db;
     public DeleteModel(DataDbContext context)
     {
-        _context = context;
+        db = context;
     }
-
     [BindProperty]
     public Models.MovieCategory MovieCategory { get; set; } = default!;
-
     public async Task<IActionResult> OnGetAsync(int? id)
     {
-        if (id == null || _context.MovieCategories == null)
+        if (id is null)
         {
             return NotFound();
         }
-
-        var moviecategory = await _context.MovieCategories.FirstOrDefaultAsync(m => m.Id == id);
-
-        if (moviecategory == null)
+        var moviecategory = await db.MovieCategories.FindAsync(id);
+        if (moviecategory is null)
         {
             return NotFound();
         }
-        else
-        {
-            MovieCategory = moviecategory;
-        }
+        MovieCategory = moviecategory;
         return Page();
     }
-
     public async Task<IActionResult> OnPostAsync(int? id)
     {
-        if (id == null || _context.MovieCategories == null)
+        if (id is null)
         {
             return NotFound();
         }
-        var moviecategory = await _context.MovieCategories.FindAsync(id);
-
-        if (moviecategory != null)
+        var moviecategory = await db.MovieCategories.FindAsync(id);
+        if (moviecategory is null)
         {
-            MovieCategory = moviecategory;
-            _context.MovieCategories.Remove(MovieCategory);
-            await _context.SaveChangesAsync();
+            return NotFound();
         }
-
+        MovieCategory = moviecategory;
+        db.MovieCategories.Remove(MovieCategory);
+        await db.SaveChangesAsync();
         return RedirectToPage("./Index");
     }
 }

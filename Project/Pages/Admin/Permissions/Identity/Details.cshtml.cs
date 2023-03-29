@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Project.Authorization;
 
-namespace Project.Pages.Admin.Identity;
+namespace Project.Pages.Admin.Permissions.Identity;
 
 public class DetailsModel : PageModel
 {
@@ -15,12 +16,16 @@ public class DetailsModel : PageModel
         {
             return NotFound();
         }
-        var result = await users.FindByIdAsync(id!.ToString()!);
-        if (result is null)
+        var identity = await users.FindByIdAsync(id.ToString()!);
+        if (identity is null)
         {
             return NotFound();
         }
-        Identity = result;
+        if (!await users.IsInRoleAsync(identity, DefaultRoles.Staff.ToString()))
+        {
+            return Content("User is not member of Staff, cant have permissions.");
+        }
+        Identity = identity;
         return Page();
     }
 }

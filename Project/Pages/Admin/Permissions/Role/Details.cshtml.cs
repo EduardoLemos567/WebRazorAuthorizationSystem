@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Project.Authorization;
 using Project.Data;
 
-namespace Project.Pages.Admin.Movie;
+namespace Project.Pages.Admin.Permissions.Role;
 
 public class DetailsModel : PageModel
 {
@@ -11,19 +12,23 @@ public class DetailsModel : PageModel
     {
         db = context;
     }
-    public Models.Movie Movie { get; set; } = default!;
+    public Models.Role Role { get; set; } = default!;
     public async Task<IActionResult> OnGetAsync(int? id)
     {
         if (id is null)
         {
             return NotFound();
         }
-        var movie = await db.Movies.FindAsync(id);
-        if (movie is null)
+        var role = await db.Roles.FindAsync(id);
+        if (role is null)
         {
             return NotFound();
         }
-        Movie = movie;
+        if (role.Name == DefaultRoles.User.ToString())
+        {
+            return Content("Role 'User' cannot have permissions.");
+        }
+        Role = role;
         return Page();
     }
 }

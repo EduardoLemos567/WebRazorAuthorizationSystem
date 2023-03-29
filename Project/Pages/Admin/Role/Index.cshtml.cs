@@ -1,25 +1,22 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Project.Data;
+using Project.Authorization;
 
 namespace Project.Pages.Admin.Role;
 
 public class IndexModel : PageModel
 {
-    private readonly DataDbContext _context;
-
-    public IndexModel(DataDbContext context)
+    private readonly RoleManager<Models.Role> roles;
+    private readonly CachedDefaultData cachedData;
+    public IndexModel(RoleManager<Models.Role> roles, CachedDefaultData cachedData)
     {
-        _context = context;
+        this.roles = roles;
+        this.cachedData = cachedData;
     }
-
     public IList<Models.Role> Roles { get; set; } = default!;
-
     public async Task OnGetAsync()
     {
-        if (_context.Roles != null)
-        {
-            Roles = await _context.Roles.ToListAsync();
-        }
+        Roles = await roles.Roles.ExceptBy(cachedData.SortedDefaultRoles, r => r.Name).ToListAsync();
     }
 }

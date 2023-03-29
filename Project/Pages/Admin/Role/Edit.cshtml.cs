@@ -1,70 +1,55 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Project.Data;
+using Project.Authorization;
 
 namespace Project.Pages.Admin.Role;
 
 public class EditModel : PageModel
 {
-    private readonly DataDbContext _context;
-
-    public EditModel(DataDbContext context)
+    private readonly RoleManager<Models.Role> roles;
+    private readonly CachedDefaultData cachedData;
+    public EditModel(RoleManager<Models.Role> roles, CachedDefaultData cachedData)
     {
-        _context = context;
+        this.roles = roles;
+        this.cachedData = cachedData;
     }
-
     [BindProperty]
     public Models.Role Role { get; set; } = default!;
-
     public async Task<IActionResult> OnGetAsync(int? id)
     {
-        if (id == null || _context.Roles == null)
+        if (id is null)
         {
             return NotFound();
         }
-
-        var role = await _context.Roles.FirstOrDefaultAsync(m => m.Id == id);
-        if (role == null)
+        var role = await roles.FindByIdAsync(id.ToString()!);
+        if (role is null)
         {
             return NotFound();
+        }
+        if (cachedData.SortedDefaultRoles.Contains(role.Name))
+        {
+            return Content("Cannot edit any of DefaultRoles.");
         }
         Role = role;
         return Page();
     }
-
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see https://aka.ms/RazorPagesCRUD.
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid)
         {
             return Page();
         }
-
-        _context.Attach(Role).State = EntityState.Modified;
-
-        try
+        if (cachedData.SortedDefaultRoles.Contains(Role.Name))
         {
-            await _context.SaveChangesAsync();
+            return Content("Cannot edit any of DefaultRoles.");
         }
-        catch (DbUpdateConcurrencyException)
+        var result = await roles.UpdateAsync(Role);
+        if (!result.Succeeded)
         {
-            if (!RoleExists(Role.Id))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
+            return Content($"Couldnt update the role. Reasons: {string.Join(", ", from e in result.Errors select e.Description)}");
         }
-
         return RedirectToPage("./Index");
-    }
-
-    private bool RoleExists(int id)
-    {
-        return (_context.Roles?.Any(e => e.Id == id)).GetValueOrDefault();
     }
 }

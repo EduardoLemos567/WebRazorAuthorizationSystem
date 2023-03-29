@@ -1,37 +1,31 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
+using Project.Authorization;
 using Project.Data;
 
 namespace Project.Pages.Admin.MovieCategory;
 
+[RequirePermission(Places.MovieCategory, Actions.Read)]
 public class DetailsModel : PageModel
 {
-    private readonly DataDbContext _context;
-
+    private readonly DataDbContext db;
     public DetailsModel(DataDbContext context)
     {
-        _context = context;
+        db = context;
     }
-
     public Models.MovieCategory MovieCategory { get; set; } = default!;
-
     public async Task<IActionResult> OnGetAsync(int? id)
     {
-        if (id == null || _context.MovieCategories == null)
+        if (id is null)
         {
             return NotFound();
         }
-
-        var moviecategory = await _context.MovieCategories.FirstOrDefaultAsync(m => m.Id == id);
-        if (moviecategory == null)
+        var moviecategory = await db.MovieCategories.FindAsync(id);
+        if (moviecategory is null)
         {
             return NotFound();
         }
-        else
-        {
-            MovieCategory = moviecategory;
-        }
+        MovieCategory = moviecategory;
         return Page();
     }
 }

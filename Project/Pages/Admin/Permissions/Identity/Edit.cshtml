@@ -1,0 +1,69 @@
+﻿@page
+@model Project.Pages.Admin.Permissions.Identity.EditModel
+
+@{
+    ViewData["Title"] = "Edit";
+}
+<br>
+<h1>Edit</h1>
+<br>
+<h4>Identity</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Identity.Alias" class="control-label"></label>
+            </div>
+            <input type="hidden" asp-for="Identity.Id" />
+            <div class="form-group">
+                <label asp-for="Identity.UserName" class="control-label"></label>
+            </div>
+            <div class="form-group">
+                <label asp-for="Identity.Email" class="control-label"></label>
+            </div>
+            @if (Model.Permissions.Count > 0)
+            {
+                <br>
+                <span asp-validation-for="SelectedPermissions" class="text-danger"></span>
+                <table class="table form-group">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.Permissions)
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int idx = 0; idx < Model.Permissions.Count; idx++)
+                        {
+                            <tr>
+                                <td>
+                                    <label class="control-label">@Html.DisplayFor(m => m.Permissions[idx])</label>
+                                </td>
+                                <td>
+                                    <input type="checkbox" name="SelectedPermissions" value="@idx" class="form-check-input" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

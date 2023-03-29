@@ -7,46 +7,37 @@ namespace Project.Pages.Admin.Movie;
 
 public class EditModel : PageModel
 {
-    private readonly DataDbContext _context;
-
+    private readonly DataDbContext db;
     public EditModel(DataDbContext context)
     {
-        _context = context;
+        db = context;
     }
-
     [BindProperty]
     public Models.Movie Movie { get; set; } = default!;
-
     public async Task<IActionResult> OnGetAsync(int? id)
     {
-        if (id == null || _context.Movies == null)
+        if (id is null)
         {
             return NotFound();
         }
-
-        var movie = await _context.Movies.FirstOrDefaultAsync(m => m.Id == id);
-        if (movie == null)
+        var movie = await db.Movies.FindAsync(id);
+        if (movie is null)
         {
             return NotFound();
         }
         Movie = movie;
         return Page();
     }
-
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see https://aka.ms/RazorPagesCRUD.
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid)
         {
             return Page();
         }
-
-        _context.Attach(Movie).State = EntityState.Modified;
-
+        db.Attach(Movie).State = EntityState.Modified;
         try
         {
-            await _context.SaveChangesAsync();
+            await db.SaveChangesAsync();
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -59,12 +50,7 @@ public class EditModel : PageModel
                 throw;
             }
         }
-
         return RedirectToPage("./Index");
     }
-
-    private bool MovieExists(int id)
-    {
-        return (_context.Movies?.Any(e => e.Id == id)).GetValueOrDefault();
-    }
+    private bool MovieExists(int id) => db.Movies.Any(e => e.Id == id);
 }

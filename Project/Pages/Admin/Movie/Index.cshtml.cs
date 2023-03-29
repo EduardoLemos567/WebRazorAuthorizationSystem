@@ -6,20 +6,14 @@ namespace Project.Pages.Admin.Movie;
 
 public class IndexModel : PageModel
 {
-    private readonly DataDbContext _context;
-
+    private readonly DataDbContext db;
     public IndexModel(DataDbContext context)
     {
-        _context = context;
+        db = context;
     }
-
     public IList<Models.Movie> Movies { get; set; } = default!;
-
     public async Task OnGetAsync()
     {
-        if (_context.Movies != null)
-        {
-            Movies = await _context.Movies.ToListAsync();
-        }
+        Movies = await db.Movies.ToListAsync();
     }
 }

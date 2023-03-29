@@ -1,37 +1,29 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using Project.Data;
 
 namespace Project.Pages.Admin.Role;
 
 public class DetailsModel : PageModel
 {
-    private readonly DataDbContext _context;
-
+    private readonly DataDbContext db;
     public DetailsModel(DataDbContext context)
     {
-        _context = context;
+        db = context;
     }
-
     public Models.Role Role { get; set; } = default!;
-
     public async Task<IActionResult> OnGetAsync(int? id)
     {
-        if (id == null || _context.Roles == null)
+        if (id is null)
         {
             return NotFound();
         }
-
-        var role = await _context.Roles.FirstOrDefaultAsync(m => m.Id == id);
-        if (role == null)
+        var role = await db.Roles.FindAsync(id);
+        if (role is null)
         {
             return NotFound();
         }
-        else
-        {
-            Role = role;
-        }
+        Role = role;
         return Page();
     }
 }

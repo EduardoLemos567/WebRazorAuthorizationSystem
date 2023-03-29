@@ -1,37 +1,28 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Project.Authorization;
 using Project.Data;
 
 namespace Project.Pages.Admin.MovieCategory;
 
+[RequirePermission(Places.MovieCategory, Actions.Create)]
 public class CreateModel : PageModel
 {
-    private readonly DataDbContext _context;
-
+    private readonly DataDbContext db;
     public CreateModel(DataDbContext context)
     {
-        _context = context;
+        db = context;
     }
-
-    public IActionResult OnGet()
-    {
-        return Page();
-    }
-
     [BindProperty]
     public Models.MovieCategory MovieCategory { get; set; } = default!;
-
-    // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
     public async Task<IActionResult> OnPostAsync()
     {
-        if (!ModelState.IsValid || _context.MovieCategories == null || MovieCategory == null)
+        if (!ModelState.IsValid)
         {
             return Page();
         }
-
-        _context.MovieCategories.Add(MovieCategory);
-        await _context.SaveChangesAsync();
-
+        db.MovieCategories.Add(MovieCategory);
+        await db.SaveChangesAsync();
         return RedirectToPage("./Index");
     }
 }

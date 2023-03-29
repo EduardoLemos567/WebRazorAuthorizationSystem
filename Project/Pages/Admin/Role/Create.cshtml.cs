@@ -1,37 +1,34 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Project.Data;
 
 namespace Project.Pages.Admin.Role;
 
 public class CreateModel : PageModel
 {
-    private readonly DataDbContext _context;
-
-    public CreateModel(DataDbContext context)
+    private readonly RoleManager<Models.Role> roles;
+    public CreateModel(RoleManager<Models.Role> roles)
     {
-        _context = context;
+        this.roles = roles;
     }
-
-    public IActionResult OnGet()
-    {
-        return Page();
-    }
-
     [BindProperty]
     public Models.Role Role { get; set; } = default!;
-
-    // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
     public async Task<IActionResult> OnPostAsync()
     {
-        if (!ModelState.IsValid || _context.Roles == null || Role == null)
+        if (!ModelState.IsValid)
         {
             return Page();
         }
-
-        _context.Roles.Add(Role);
-        await _context.SaveChangesAsync();
-
+        if (await roles.RoleExistsAsync(Role.Name!))
+        {
+            return Content("Role already exists.");
+        }
+        var creationResult = await roles.CreateAsync(Role);
+        if (!creationResult.Succeeded)
+        {
+            return Content($"Could not create role. Reasons {string.Join(", ",
+                from e in creationResult.Errors select e.Description)}");
+        }
         return RedirectToPage("./Index");
     }
 }
