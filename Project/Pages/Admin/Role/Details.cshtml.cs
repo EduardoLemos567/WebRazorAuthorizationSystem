@@ -1,29 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Project.Data;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Project.Authorization;
 
 namespace Project.Pages.Admin.Role;
 
-public class DetailsModel : PageModel
+public class DetailsModel : CrudPageModel
 {
-    private readonly DataDbContext db;
-    public DetailsModel(DataDbContext context)
-    {
-        db = context;
-    }
-    public Models.Role Role { get; set; } = default!;
+    public DetailsModel(RoleManager<Models.Role> roles, CachedDefaultData cachedData) : base(roles, cachedData) { }
     public async Task<IActionResult> OnGetAsync(int? id)
     {
-        if (id is null)
-        {
-            return NotFound();
-        }
-        var role = await db.Roles.FindAsync(id);
-        if (role is null)
-        {
-            return NotFound();
-        }
-        Role = role;
+        var role = await TryFindRoleAsync(id);
+        if (role is null) { return NotFound(); }
+        Role = Models.SummaryRole.FromRole(role);
         return Page();
     }
 }

@@ -1,57 +1,26 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using Project.Authorization;
 using Project.Data;
 
 namespace Project.Pages.Admin.MovieCategory;
 
 [RequirePermission(Places.MovieCategory, Actions.Update)]
-public class EditModel : PageModel
+public class EditModel : CrudPageModel
 {
-    private readonly DataDbContext db;
-    public EditModel(DataDbContext context)
-    {
-        db = context;
-    }
-    [BindProperty]
-    public Models.MovieCategory MovieCategory { get; set; } = default!;
+    public EditModel(DataDbContext db) : base(db) { }
     public async Task<IActionResult> OnGetAsync(int? id)
     {
-        if (id is null)
-        {
-            return NotFound();
-        }
-        var moviecategory = await db.MovieCategories.FindAsync(id);
-        if (moviecategory is null)
-        {
-            return NotFound();
-        }
+        var moviecategory = await TryFindMovieCategoryAsync(id);
+        if (moviecategory is null) { return NotFound(); }
         MovieCategory = moviecategory;
         return Page();
     }
     public async Task<IActionResult> OnPostAsync()
     {
-        if (!ModelState.IsValid)
-        {
-            return Page();
-        }
-        db.Attach(MovieCategory).State = EntityState.Modified;
-        try
-        {
-            await db.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            if (!MovieCategoryExists(MovieCategory.Id))
-            {
-                return NotFound();
-            }
-            else
-            {
-                throw;
-            }
-        }
+        if (!ModelState.IsValid) { return Page(); }
+        if (!MovieCategoryExists(MovieCategory.Id)) { return NotFound(); }
+        db.MovieCategories.Update(MovieCategory);
+        await db.SaveChangesAsync();
         return RedirectToPage("./Index");
     }
     private bool MovieCategoryExists(int id)

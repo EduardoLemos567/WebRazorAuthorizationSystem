@@ -1,27 +1,19 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.ComponentModel.DataAnnotations;
 
 namespace Project.Pages.Admin.Identity;
 
-public class EditModel : PageModel
+public class EditModel : CrudPageModel
 {
-    private readonly UserManager<Models.Identity> users;
-    public EditModel(UserManager<Models.Identity> users) => this.users = users;
-    [BindProperty]
-    public Models.Identity Identity { get; set; } = default!;
+    public EditModel(UserManager<Models.Identity> users) : base(users) { }
+    [BindProperty, DataType(DataType.Password), Display(Name = "New password")]
+    public string? NewPassword { get; set; }
     public async Task<IActionResult> OnGetAsync(int? id)
     {
-        if (id is null)
-        {
-            return NotFound();
-        }
-        var result = await users.FindByIdAsync(id!.ToString()!);
-        if (result is null)
-        {
-            return NotFound();
-        }
-        Identity = result;
+        var user = await this.TryFindUserAsync(id);
+        if (user is null) { return NotFound(); }
+        Identity = Models.SummaryIdentity.FromIdentity(user);
         return Page();
     }
     public async Task<IActionResult> OnPostAsync()
@@ -30,14 +22,26 @@ public class EditModel : PageModel
         {
             return Page();
         }
-        if (!users.Users.Any(user => user.Id == Identity.Id))
+        // Find user
+        var user = await this.TryFindUserAsync(Identity.Id);
+        if (user is null) { return NotFound(); }
+        // Change password
+        if (!string.IsNullOrEmpty(NewPassword))
         {
-            return NotFound();
+            var token = await users.GeneratePasswordResetTokenAsync(user);
+            var resetResult = await users.ResetPasswordAsync(user, token, NewPassword);
+            if (!resetResult.Succeeded)
+            {
+                if (this.CheckPasswordErrors(resetResult, nameof(NewPassword))) { return Page(); }
+                return Content("User update failed");
+            }
         }
-        var result = await users.UpdateAsync(Identity);
-        if (!result.Succeeded)
+        // Update other details
+        Identity.Update(user);
+        var updateResult = await users.UpdateAsync(user);
+        if (!updateResult.Succeeded)
         {
-            return Content("Couldnt update the user");
+            return Content("User update failed");
         }
         return Content("User updated");
     }

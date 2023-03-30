@@ -12,18 +12,18 @@
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="LoginInfo.Email" class="control-label"></label>
-                <input asp-for="LoginInfo.Email" class="form-control" />
-                <span asp-validation-for="LoginInfo.Email" class="text-danger"></span>
+                <label asp-for="Login.Email" class="control-label"></label>
+                <input asp-for="Login.Email" class="form-control" />
+                <span asp-validation-for="Login.Email" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="LoginInfo.Password" class="control-label"></label>
-                <input asp-for="LoginInfo.Password" class="form-control" />
-                <span asp-validation-for="LoginInfo.Password" class="text-danger"></span>
+                <label asp-for="Login.Password" class="control-label"></label>
+                <input asp-for="Login.Password" class="form-control" />
+                <span asp-validation-for="Login.Password" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="LoginInfo.RememberMe" class="control-label"></label>
-                <input asp-for="LoginInfo.RememberMe" class="form-check-input" />
+                <label asp-for="Login.RememberMe" class="control-label"></label>
+                <input asp-for="Login.RememberMe" class="form-check-input" />
             </div>
             <div class="form-group">
                 <input type="submit" value="Login" class="btn btn-primary" />

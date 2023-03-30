@@ -25,7 +25,7 @@ public class LoginModel : PageModel
         this.optionsMonitor = optionsMonitor;
     }
     [BindProperty]
-    public LoginInfo LoginInfo { get; set; } = default!;
+    public Login Login { get; set; } = default!;
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid)
@@ -33,14 +33,14 @@ public class LoginModel : PageModel
             logger.LogDebug("Invalid model state, return to the same page.");
             return Page();
         }
-        var identity = await users.FindByEmailAsync(LoginInfo.Email!);
+        var identity = await users.FindByEmailAsync(Login.Email!);
         if (identity is null)
         {
-            logger.LogDebug("User not found for email {Email}", LoginInfo.Email);
+            logger.LogDebug("User not found for email {Email}", Login.Email);
             return Unauthorized();
         }
         //TODO: bug, isPersistent is always active between sessions, true or false doesnt change.
-        var signinResult = await signor.PasswordSignInAsync(identity!, LoginInfo.Password!, LoginInfo.RememberMe, LOCKOUT_ON_FAILURE);
+        var signinResult = await signor.PasswordSignInAsync(identity!, Login.Password!, Login.RememberMe, LOCKOUT_ON_FAILURE);
         if (!signinResult.Succeeded)
         {
             logger.LogDebug("User {identity} signin failed, reason: {signinResult}.", identity, signinResult);

@@ -17,6 +17,6 @@ public class IndexModel : PageModel
     public IList<Models.Role> Roles { get; set; } = default!;
     public async Task OnGetAsync()
     {
-        Roles = await roles.Roles.ExceptBy(cachedData.SortedDefaultRoles, r => r.Name).ToListAsync();
+        Roles = await (from r in roles.Roles where !cachedData.IsDefaultRole(r) select r).ToListAsync();
     }
 }

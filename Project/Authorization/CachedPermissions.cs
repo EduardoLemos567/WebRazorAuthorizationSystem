@@ -1,5 +1,6 @@
 ﻿namespace Project.Authorization;
 
+// Need a better name
 public class CachedDefaultData
 {
     public IReadOnlyList<Permission> SortedPermissions { get; }
@@ -15,4 +16,5 @@ public class CachedDefaultData
         Array.Sort(sortedRoles);
         SortedDefaultRoles = sortedRoles;
     }
+    public bool IsDefaultRole(Models.Role role) => SortedDefaultRoles.Contains(role.Name);
 }

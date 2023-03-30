@@ -1,55 +1,34 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using Project.Authorization;
 
 namespace Project.Pages.Admin.Role;
 
-public class EditModel : PageModel
+public class EditModel : CrudPageModel
 {
-    private readonly RoleManager<Models.Role> roles;
-    private readonly CachedDefaultData cachedData;
-    public EditModel(RoleManager<Models.Role> roles, CachedDefaultData cachedData)
-    {
-        this.roles = roles;
-        this.cachedData = cachedData;
-    }
-    [BindProperty]
-    public Models.Role Role { get; set; } = default!;
+    public EditModel(RoleManager<Models.Role> roles, CachedDefaultData cachedData) : base(roles, cachedData) { }
     public async Task<IActionResult> OnGetAsync(int? id)
     {
-        if (id is null)
-        {
-            return NotFound();
-        }
-        var role = await roles.FindByIdAsync(id.ToString()!);
-        if (role is null)
-        {
-            return NotFound();
-        }
-        if (cachedData.SortedDefaultRoles.Contains(role.Name))
-        {
-            return Content("Cannot edit any of DefaultRoles.");
-        }
-        Role = role;
+        var role = await TryFindRoleAsync(id);
+        if (role is null) { return NotFound(); }
+        if (cachedData.IsDefaultRole(role)) { return CantEditDefault(); }
+        Role = Models.SummaryRole.FromRole(role);
         return Page();
     }
     public async Task<IActionResult> OnPostAsync()
     {
-        if (!ModelState.IsValid)
-        {
-            return Page();
-        }
-        if (cachedData.SortedDefaultRoles.Contains(Role.Name))
-        {
-            return Content("Cannot edit any of DefaultRoles.");
-        }
-        var result = await roles.UpdateAsync(Role);
+        if (!ModelState.IsValid) { return Page(); }
+        var role = await TryFindRoleAsync(Role.Id);
+        if (role is null) { return NotFound(); }
+        if (cachedData.IsDefaultRole(role)) { return CantEditDefault(); }
+        Role.Update(role);
+        var result = await roles.UpdateAsync(role);
         if (!result.Succeeded)
         {
-            return Content($"Couldnt update the role. Reasons: {string.Join(", ", from e in result.Errors select e.Description)}");
+            return Content($"Couldnt update the role. Reasons: {string.Join(", ",
+                from e in result.Errors select e.Description)}");
         }
         return RedirectToPage("./Index");
     }
+    private ContentResult CantEditDefault() => Content("Cannot edit any of DefaultRoles.");
 }

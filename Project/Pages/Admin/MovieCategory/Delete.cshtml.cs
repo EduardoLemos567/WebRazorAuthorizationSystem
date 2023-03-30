@@ -1,47 +1,25 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Project.Authorization;
 using Project.Data;
 
 namespace Project.Pages.Admin.MovieCategory;
 
 [RequirePermission(Places.MovieCategory, Actions.Delete)]
-public class DeleteModel : PageModel
+public class DeleteModel : CrudPageModel
 {
-    private readonly DataDbContext db;
-    public DeleteModel(DataDbContext context)
-    {
-        db = context;
-    }
-    [BindProperty]
-    public Models.MovieCategory MovieCategory { get; set; } = default!;
+    public DeleteModel(DataDbContext db) : base(db) { }
     public async Task<IActionResult> OnGetAsync(int? id)
     {
-        if (id is null)
-        {
-            return NotFound();
-        }
-        var moviecategory = await db.MovieCategories.FindAsync(id);
-        if (moviecategory is null)
-        {
-            return NotFound();
-        }
+        var moviecategory = await this.TryFindMovieCategoryAsync(id);
+        if (moviecategory is null) { return NotFound(); }
         MovieCategory = moviecategory;
         return Page();
     }
     public async Task<IActionResult> OnPostAsync(int? id)
     {
-        if (id is null)
-        {
-            return NotFound();
-        }
-        var moviecategory = await db.MovieCategories.FindAsync(id);
-        if (moviecategory is null)
-        {
-            return NotFound();
-        }
-        MovieCategory = moviecategory;
-        db.MovieCategories.Remove(MovieCategory);
+        var moviecategory = await this.TryFindMovieCategoryAsync(id);
+        if (moviecategory is null) { return NotFound(); }
+        db.MovieCategories.Remove(moviecategory);
         await db.SaveChangesAsync();
         return RedirectToPage("./Index");
     }
