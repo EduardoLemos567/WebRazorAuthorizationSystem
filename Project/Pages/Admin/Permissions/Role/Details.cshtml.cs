@@ -1,34 +1,28 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Project.Authorization;
-using Project.Data;
 
 namespace Project.Pages.Admin.Permissions.Role;
 
-public class DetailsModel : PageModel
+public class DetailsModel : CrudPageModel
 {
-    private readonly DataDbContext db;
-    public DetailsModel(DataDbContext context)
-    {
-        db = context;
-    }
-    public Models.Role Role { get; set; } = default!;
+    public DetailsModel(RoleManager<Models.Role> roles, CachedDefaultData cachedData) : base(roles, cachedData) { }
+    public IReadOnlyList<string> SelectedPermissions { get; set; } = default!;
     public async Task<IActionResult> OnGetAsync(int? id)
     {
-        if (id is null)
+        var role = await TryFindRoleAsync(id);
+        if (role is null) { return NotFound(); }
+        if (!CanModifyPermissions(role)) { return NotAllowedModify(); }
+        Role = Models.SummaryRole.FromRole(role);
+        var oldClaim = await TryFindOldClaimAsync(role);
+        if (oldClaim is not null && oldClaim.Value.Length > 0)
         {
-            return NotFound();
+            SelectedPermissions = (from p in Requirements.PermissionsFromString(oldClaim.Value) select p.ToString()).ToArray();
         }
-        var role = await db.Roles.FindAsync(id);
-        if (role is null)
+        else
         {
-            return NotFound();
+            SelectedPermissions = Array.Empty<string>();
         }
-        if (role.Name == DefaultRoles.User.ToString())
-        {
-            return Content("Role 'User' cannot have permissions.");
-        }
-        Role = role;
         return Page();
     }
 }

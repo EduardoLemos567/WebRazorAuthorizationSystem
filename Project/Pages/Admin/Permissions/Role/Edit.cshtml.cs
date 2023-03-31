@@ -1,69 +1,56 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Project.Authorization;
 using System.Security.Claims;
 
 namespace Project.Pages.Admin.Permissions.Role;
 
-public class EditModel : PageModel
+public class EditModel : CrudPageModel
 {
-    private readonly RoleManager<Models.Role> roles;
-    private readonly CachedDefaultData permissions;
-    public EditModel(RoleManager<Models.Role> roles, CachedDefaultData permissions)
-    {
-        this.roles = roles;
-        this.permissions = permissions;
-    }
-    public Models.Role Role { get; set; } = default!;
-    public IReadOnlyList<string> Permissions => permissions.SortedPermissionsStrings;
+    public EditModel(RoleManager<Models.Role> roles, CachedDefaultData cachedData) : base(roles, cachedData) { }
     [BindProperty]
     public IList<int> SelectedPermissions { get; set; } = default!;
     public async Task<IActionResult> OnGetAsync(int? id)
     {
-        if (id is null)
+        var role = await TryFindRoleAsync(id);
+        if (role is null) { return NotFound(); }
+        if (!CanModifyPermissions(role)) { return NotAllowedModify(); }
+        Role = Models.SummaryRole.FromRole(role);
+        var oldClaim = await TryFindOldClaimAsync(role);
+        if (oldClaim is not null && oldClaim.Value.Length > 0)
         {
-            return NotFound();
+            var permissionsChar = oldClaim.Value.ToArray();
+            Array.Sort(permissionsChar);
+            var selected = new int[permissionsChar.Length];
+            //TODO here and modify Users counterpart
         }
-        var role = await roles.FindByIdAsync(id.ToString()!);
-        // Identity not found or identity is not in default role 'staff'.
-        if (role is null)
+        else
         {
-            return NotFound();
+            SelectedPermissions = Array.Empty<int>();
         }
-        if (role.Name == DefaultRoles.User.ToString())
-        {
-            return Content("Role 'User' cannot have permissions.");
-        }
-        Role = role;
         return Page();
     }
     public async Task<IActionResult> OnPostAsync()
     {
-        if ((from idx in SelectedPermissions where idx >= 0 || idx < SelectedPermissions.Count select idx).Any())
+        if (SelectedPermissionsIsInvalid())
         {
             ModelState.AddModelError("SelectedPermissions", "Incorrect selected permissions");
         }
-        if (!ModelState.IsValid)
-        {
-            return Page();
-        }
-        var oldClaim = (await roles.GetClaimsAsync(Role))
-            .Where(c => c.Type == Requirements.PERMISSIONS_CLAIM_TYPE)
-            .FirstOrDefault();
-        var newClaim = new Claim(
-            Requirements.PERMISSIONS_CLAIM_TYPE,
-            new((from i in SelectedPermissions select permissions.SortedPermissions[i].data).ToArray())
-        );
+        if (!ModelState.IsValid) { return Page(); }
+        var role = await TryFindRoleAsync(Role.Id);
+        if (role is null) { return NotFound(); }
+        if (!CanModifyPermissions(role)) { return NotAllowedModify(); }
+        var oldClaim = await TryFindOldClaimAsync(role);
+        var newClaim = CollectPermissionsIntoClaim();
         if (oldClaim is not null)
         {
-            var removeClaimResult = await roles.RemoveClaimAsync(Role, oldClaim);
+            var removeClaimResult = await roles.RemoveClaimAsync(role, oldClaim);
             if (!removeClaimResult.Succeeded)
             {
                 return SavePermissionError(string.Join(", ", from e in removeClaimResult.Errors select e.Description));
             }
         }
-        var addClaimResult = await roles.AddClaimAsync(Role, newClaim);
+        var addClaimResult = await roles.AddClaimAsync(role, newClaim);
         if (!addClaimResult.Succeeded)
         {
             return SavePermissionError(string.Join(", ", from e in addClaimResult.Errors select e.Description));
@@ -74,4 +61,12 @@ public class EditModel : PageModel
     {
         return Content($"Could not save permissions, try again.\nReasons: {reasons}");
     }
+    private Claim CollectPermissionsIntoClaim()
+    {
+        return new(
+            Requirements.PERMISSIONS_CLAIM_TYPE,
+            new((from i in SelectedPermissions select cachedData.SortedPermissions[i].data).ToArray())
+        );
+    }
+    private bool SelectedPermissionsIsInvalid() => (from idx in SelectedPermissions where idx < 0 || idx >= SelectedPermissions.Count select idx).Any();
 }

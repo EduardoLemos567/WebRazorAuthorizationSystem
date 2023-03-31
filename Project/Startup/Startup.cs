@@ -74,74 +74,78 @@ public static class Startup
             var roles = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
             var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("AddInitialData");
 
-            // If any of default roles doesnt exist in Roles, we recreate all, skipping the already created.
-            var defaultRoles = Enum.GetNames<DefaultRoles>();
-            if (defaultRoles.Except(from r in roles.Roles select r.Name).Any())
-            {
-                // Create all default roles
-                foreach (var defaultRole in defaultRoles)
+            {   // Create roles
+                // If any of default roles doesnt exist in Roles, we recreate missing ones.
+                var defaultRoles = Enum.GetNames<DefaultRoles>();
+                var createdRoles = from r in roles.Roles select r.Name;
+                foreach (var name in defaultRoles.Except(createdRoles))
                 {
-                    if (LogFail(logger,
-                               roles.CreateAsync(new(defaultRole)).Result,
-                               $"Could not create default role '{defaultRole}'"))
+                    var createRoleResult = roles.CreateAsync(new(name)).Result;
+                    if (!createRoleResult.Succeeded)
                     {
-                        continue;
+                        logger.LogWarning("Could not create default role {name}.", name);
                     }
                 }
             }
-            {
+            {   // Add permissions to admin role
                 // Get admin role
                 var adminRole = roles.FindByNameAsync(DefaultRoles.Admin.ToString()).Result;
                 if (adminRole is null)
                 {
-                    logger.LogWarning("Could not find admin role");
+                    logger.LogWarning("Could not find admin role.");
                     return;
                 }
-                // Add all permissions as claim to admin role
-                if (LogFail(logger,
-                            roles.AddClaimAsync(
-                                adminRole!,
-                                new(Requirements.PERMISSIONS_CLAIM_TYPE,
-                                    Requirements.AllRequiredPermissionsString())
-                            ).Result,
-                            "Could not add all permissions to admin role"))
+                // Add all permissions
+                var oldClaims = roles.GetClaimsAsync(adminRole!).Result;
+                if ((from c in oldClaims where c.Type == Requirements.PERMISSIONS_CLAIM_TYPE select c).Any())
                 {
-                    return;
+                    logger.LogInformation("Admin role already contains permissions.");
+                }
+                else
+                {
+                    var addClaimResult = roles.AddClaimAsync(adminRole!,
+                            new(Requirements.PERMISSIONS_CLAIM_TYPE,
+                                Requirements.AllRequiredPermissionsString())).Result;
+                    if (!addClaimResult.Succeeded)
+                    {
+                        logger.LogWarning("Could not add all permissions to admin role.");
+                    }
                 }
             }
-            // Create admin identity
-            var users = scope.ServiceProvider.GetRequiredService<UserManager<Identity>>();
-            if (users.FindByNameAsync("Admin").Result is not null)
             {
-                logger.LogInformation("Admin was already created.");
-                return;
+                // Create admin identity
+                var users = scope.ServiceProvider.GetRequiredService<UserManager<Identity>>();
+                if (users.FindByNameAsync("Admin").Result is not null)
+                {
+                    logger.LogInformation("Admin was already created.");
+                    return;
+                }
+                var identity = new Identity
+                {
+                    UserName = "Admin",
+                    Email = "admin@admin.com",
+                };
+                var userCreationResult = users.CreateAsync(identity, "Admin1&").Result;
+                if (!userCreationResult.Succeeded)
+                {
+                    logger.LogWarning("Could not create admin identity.");
+                    return;
+                }
+                // Add admin identity to Admin role
+                var addToAdminRoleResult = users.AddToRoleAsync(identity, DefaultRoles.Admin.ToString()).Result;
+                if (!addToAdminRoleResult.Succeeded)
+                {
+                    logger.LogWarning("Could not add admin identity to admin role.");
+                    return;
+                }
+                var addToStaffRoleResult = users.AddToRoleAsync(identity, DefaultRoles.Staff.ToString()).Result;
+                if (!addToStaffRoleResult.Succeeded)
+                {
+                    logger.LogWarning("Could not add admin identity to staff role.");
+                    return;
+                }
+                logger.LogInformation("Admin user created.");
             }
-            var identity = new Identity
-            {
-                UserName = "Admin",
-                Email = "admin@admin.com",
-            };
-            if (LogFail(logger,
-                        users.CreateAsync(identity, "Admin1&").Result,
-                        "Could not create admin identity"))
-            {
-                return;
-            }
-            // Add admin identity to Admin role
-            if (LogFail(logger,
-                        users.AddToRoleAsync(identity, DefaultRoles.Admin.ToString()).Result,
-                        "Could not add admin identity to admin role"))
-            {
-                return;
-            }
-            // Also add to Staff role
-            if (LogFail(logger,
-                        users.AddToRoleAsync(identity, DefaultRoles.Staff.ToString()).Result,
-                        "Could not add admin identity to staff role"))
-            {
-                return;
-            }
-            logger.LogInformation("Admin user created.");
         }
     }
     public static void SetupSeedData(IServiceProvider services)
@@ -171,10 +175,4 @@ public static class Startup
         app.MapRazorPages();
     }
     #endregion AFTER_BUILD
-    private static bool LogFail(ILogger logger, IdentityResult result, string msg)
-    {
-        if (result.Succeeded) { return false; }
-        logger.LogWarning("{msg}, reason: {reasons}", msg, string.Join(',', from e in result.Errors select e.Description));
-        return true;
-    }
 }
