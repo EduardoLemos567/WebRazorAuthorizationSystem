@@ -30,6 +30,26 @@
             @Html.DisplayFor(model => model.Identity.Email)
         </dd>
     </dl>
+    <br>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Permissions)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int idx = 0; idx < Model.SelectedPermissions.Count; idx++)
+            {
+                <tr>
+                    <td>
+                        <label class="control-label">@Html.DisplayFor(m => m.Permissions[m.SelectedPermissions[idx]])</label>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>
 <div>
     <a asp-page="./Edit" asp-route-id="@Model.Identity.Id">Edit</a> |

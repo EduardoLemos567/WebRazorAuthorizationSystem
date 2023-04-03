@@ -7,4 +7,3 @@ Startup.SetupSeedData(app.Services);
 Startup.AddMiddlewares(app);
 Startup.AddInitialData(app);
 app.Run();
-

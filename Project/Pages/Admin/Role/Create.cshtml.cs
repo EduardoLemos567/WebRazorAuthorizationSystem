@@ -7,6 +7,8 @@ namespace Project.Pages.Admin.Role;
 public class CreateModel : CrudPageModel
 {
     public CreateModel(RoleManager<Models.Role> roles, CachedDefaultData cachedData) : base(roles, cachedData) { }
+    [BindProperty]
+    public Models.SummaryRole Role { get; set; } = default!;
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid) { return Page(); }

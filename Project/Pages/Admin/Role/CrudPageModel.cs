@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Project.Authorization;
 
@@ -14,8 +13,6 @@ public class CrudPageModel : PageModel
         this.roles = roles;
         this.cachedData = cachedData;
     }
-    [BindProperty]
-    public Models.SummaryRole Role { get; set; } = default!;
     protected async Task<Models.Role?> TryFindRoleAsync(int? id)
     {
         if (id is null) { return null; }

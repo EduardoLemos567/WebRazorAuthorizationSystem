@@ -15,6 +15,9 @@ public class IndexModel : PageModel
     public IList<Models.Role> Roles { get; set; } = default!;
     public async Task OnGetAsync()
     {
-        Roles = await db.Roles.Where(r => r.Name != DefaultRoles.User.ToString()).ToListAsync();
+        Roles = await db.Roles.Where(r =>
+            r.Name != DefaultRoles.User.ToString()
+            && r.Name != DefaultRoles.Admin.ToString()
+        ).ToListAsync();
     }
 }

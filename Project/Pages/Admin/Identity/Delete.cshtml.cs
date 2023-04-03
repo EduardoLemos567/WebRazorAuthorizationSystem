@@ -5,6 +5,7 @@ namespace Project.Pages.Admin.Identity;
 
 public class DeleteModel : CrudPageModel
 {
+    public Models.SummaryIdentity Identity { get; set; } = default!;
     public DeleteModel(UserManager<Models.Identity> users) : base(users) { }
     public async Task<IActionResult> OnGetAsync(int? id)
     {

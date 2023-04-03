@@ -38,4 +38,29 @@ public static class Requirements
     {
         return new(PERMISSIONS_CLAIM_TYPE, PermissionsIntoString(permissions));
     }
+    public static IList<int> PermissionsStringToIndices(in string stringPermissions, IReadOnlyList<Permission> sortedPermissions)
+    {
+        var permissionsChars = stringPermissions.ToArray();
+        Array.Sort(permissionsChars);
+        var selected = new int[permissionsChars.Length];
+        var selectedCount = 0;
+        for (int i = 0; i < sortedPermissions.Count; i++)
+        {
+            if (sortedPermissions[i].data == permissionsChars[selectedCount])
+            {
+                selected[selectedCount++] = i;
+                if (selectedCount >= selected.Length) { break; }
+            }
+        }
+        return selected;
+    }
+    public static string PermissionsIndicesToString(in IList<int> permissionsIndices, IReadOnlyList<Permission> sortedPermissions)
+    {
+        var permissionsChars = new char[permissionsIndices.Count];
+        for (int i = 0; i < permissionsIndices.Count; i++)
+        {
+            permissionsChars[i] = sortedPermissions[permissionsIndices[i]].data;
+        }
+        return new(permissionsChars);
+    }
 }

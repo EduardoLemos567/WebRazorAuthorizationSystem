@@ -6,6 +6,8 @@ namespace Project.Pages.Admin.Movie;
 public class EditModel : CrudPageModel
 {
     public EditModel(DataDbContext db) : base(db) { }
+    [BindProperty]
+    public Models.Movie Movie { get; set; } = default!;
     public async Task<IActionResult> OnGetAsync(int? id)
     {
         var movie = await this.TryFindMovieAsync(id);

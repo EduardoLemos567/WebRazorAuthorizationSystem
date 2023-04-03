@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Project.Authorization;
-using Project.Models;
+using System.Security.Claims;
 
 namespace Project.Pages.Admin.Permissions.Identity;
 
@@ -15,10 +15,7 @@ public class CrudPageModel : PageModel
         this.users = users;
         this.cachedData = cachedData;
     }
-    public SummaryIdentity Identity { get; set; } = default!;
     public IReadOnlyList<string> Permissions => cachedData.SortedPermissionsStrings;
-    [BindProperty]
-    public IList<int> SelectedPermissions { get; set; } = default!;
     protected async Task<Models.Identity?> TryFindUserAsync(int? id)
     {
         if (id is null) { return null; }
@@ -29,4 +26,10 @@ public class CrudPageModel : PageModel
         return users.IsInRoleAsync(user, DefaultRoles.Staff.ToString());
     }
     protected IActionResult NotAllowedModify() => Content("User is not member of 'Staff', cant have permissions.");
+    protected async Task<Claim?> TryFindOldClaimAsync(Models.Identity user)
+    {
+        return (await users.GetClaimsAsync(user))
+            .Where(c => c.Type == Requirements.PERMISSIONS_CLAIM_TYPE)
+            .FirstOrDefault();
+    }
 }

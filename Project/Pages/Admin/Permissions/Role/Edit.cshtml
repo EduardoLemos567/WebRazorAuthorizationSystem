@@ -9,16 +9,18 @@
 <br>
 <h4>Role</h4>
 <hr />
+<dl class="row">
+    <dt class="col-sm-2">
+        @Html.DisplayNameFor(model => model.Role.Name)
+    </dt>
+    <dd class="col-sm-10">
+        @Html.DisplayFor(model => model.Role.Name)
+    </dd>
+</dl>
 <div class="row">
     <div class="col-md-4">
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Role.Id" />
-            <div class="form-group">
-                <label asp-for="Role.Name" class="control-label"></label>
-                <input asp-for="Role.Name" class="form-control" />
-                <span asp-validation-for="Role.Name" class="text-danger"></span>
-            </div>
             @if (Model.Permissions.Count > 0)
             {
                 <br>
@@ -33,14 +35,19 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @for (int idx = 0; idx < Model.Permissions.Count; idx++)
+                        @for (int i = 0, selectedPermissionsIndex = 0; i < Model.Permissions.Count; i++)
                         {
                             <tr>
                                 <td>
-                                    <label class="control-label">@Html.DisplayFor(m => m.Permissions[idx])</label>
+                                    <label class="control-label">@Html.DisplayFor(m => m.Permissions[i])</label>
                                 </td>
                                 <td>
-                                    <input type="checkbox" name="SelectedPermissions" value="@idx" class="form-check-input" />
+                                    @{
+                                        var isChecked = selectedPermissionsIndex < Model.SelectedPermissions.Count
+                                        && Model.SelectedPermissions[selectedPermissionsIndex] == i;
+                                        if (isChecked) { selectedPermissionsIndex++; }
+                                    }
+                                    <input type="checkbox" name="SelectedPermissions" value="@i" class="form-check-input" checked=@isChecked />
                                 </td>
                             </tr>
                         }

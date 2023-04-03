@@ -8,6 +8,8 @@ namespace Project.Pages.Admin.MovieCategory;
 public class CreateModel : CrudPageModel
 {
     public CreateModel(DataDbContext db) : base(db) { }
+    [BindProperty]
+    public Models.MovieCategory MovieCategory { get; set; } = default!;
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid) { return Page(); }

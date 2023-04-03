@@ -8,6 +8,7 @@ namespace Project.Pages.Admin.MovieCategory;
 public class DetailsModel : CrudPageModel
 {
     public DetailsModel(DataDbContext db) : base(db) { }
+    public Models.MovieCategory MovieCategory { get; set; } = default!;
     public async Task<IActionResult> OnGetAsync(int? id)
     {
         var moviecategory = await this.TryFindMovieCategoryAsync(id);

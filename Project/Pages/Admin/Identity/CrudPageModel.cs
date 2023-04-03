@@ -7,8 +7,6 @@ namespace Project.Pages.Admin.Identity;
 public class CrudPageModel : PageModel
 {
     protected readonly UserManager<Models.Identity> users;
-    [BindProperty]
-    public Models.SummaryIdentity Identity { get; set; } = default!;
     public CrudPageModel(UserManager<Models.Identity> users) => this.users = users;
     protected async Task<Models.Identity?> TryFindUserAsync(int? id)
     {

@@ -6,8 +6,9 @@ namespace Project.Pages.Admin.Permissions.Role;
 
 public class DetailsModel : CrudPageModel
 {
+    public Models.SummaryRole Role { get; set; } = default!;
+    public IList<int> SelectedPermissions { get; set; } = default!;
     public DetailsModel(RoleManager<Models.Role> roles, CachedDefaultData cachedData) : base(roles, cachedData) { }
-    public IReadOnlyList<string> SelectedPermissions { get; set; } = default!;
     public async Task<IActionResult> OnGetAsync(int? id)
     {
         var role = await TryFindRoleAsync(id);
@@ -17,11 +18,11 @@ public class DetailsModel : CrudPageModel
         var oldClaim = await TryFindOldClaimAsync(role);
         if (oldClaim is not null && oldClaim.Value.Length > 0)
         {
-            SelectedPermissions = (from p in Requirements.PermissionsFromString(oldClaim.Value) select p.ToString()).ToArray();
+            SelectedPermissions = Requirements.PermissionsStringToIndices(oldClaim.Value, cachedData.SortedPermissions);
         }
         else
         {
-            SelectedPermissions = Array.Empty<string>();
+            SelectedPermissions = Array.Empty<int>();
         }
         return Page();
     }

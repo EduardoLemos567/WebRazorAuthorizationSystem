@@ -7,6 +7,8 @@ namespace Project.Pages.Admin.Role;
 public class EditModel : CrudPageModel
 {
     public EditModel(RoleManager<Models.Role> roles, CachedDefaultData cachedData) : base(roles, cachedData) { }
+    [BindProperty]
+    public Models.SummaryRole Role { get; set; } = default!;
     public async Task<IActionResult> OnGetAsync(int? id)
     {
         var role = await TryFindRoleAsync(id);

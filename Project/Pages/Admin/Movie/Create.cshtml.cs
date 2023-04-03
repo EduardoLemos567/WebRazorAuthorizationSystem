@@ -6,6 +6,8 @@ namespace Project.Pages.Admin.Movie;
 public class CreateModel : CrudPageModel
 {
     public CreateModel(DataDbContext db) : base(db) { }
+    [BindProperty]
+    public Models.Movie Movie { get; set; } = default!;
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid) { return Page(); }

@@ -7,6 +7,8 @@ namespace Project.Pages.Admin.Identity;
 public class EditModel : CrudPageModel
 {
     public EditModel(UserManager<Models.Identity> users) : base(users) { }
+    [BindProperty]
+    public Models.SummaryIdentity Identity { get; set; } = default!;
     [BindProperty, DataType(DataType.Password), Display(Name = "New password")]
     public string? NewPassword { get; set; }
     public async Task<IActionResult> OnGetAsync(int? id)

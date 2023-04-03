@@ -8,8 +8,6 @@ public class CrudPageModel : PageModel
 {
     protected readonly DataDbContext db;
     public CrudPageModel(DataDbContext db) => this.db = db;
-    [BindProperty]
-    public Models.Movie Movie { get; set; } = default!;
     protected async Task<Models.Movie?> TryFindMovieAsync(int? id)
     {
         if (id is null) { return null; }

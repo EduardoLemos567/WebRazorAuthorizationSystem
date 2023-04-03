@@ -9,20 +9,30 @@
 <br>
 <h4>Identity</h4>
 <hr />
+<dl class="row">
+    <dt class="col-sm-2">
+        @Html.DisplayNameFor(model => model.Identity.Alias)
+    </dt>
+    <dd class="col-sm-10">
+        @Html.DisplayFor(model => model.Identity.Alias)
+    </dd>
+    <dt class="col-sm-2">
+        @Html.DisplayNameFor(model => model.Identity.UserName)
+    </dt>
+    <dd class="col-sm-10">
+        @Html.DisplayFor(model => model.Identity.UserName)
+    </dd>
+    <dt class="col-sm-2">
+        @Html.DisplayNameFor(model => model.Identity.Email)
+    </dt>
+    <dd class="col-sm-10">
+        @Html.DisplayFor(model => model.Identity.Email)
+    </dd>
+</dl>
 <div class="row">
     <div class="col-md-4">
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Identity.Alias" class="control-label"></label>
-            </div>
-            <input type="hidden" asp-for="Identity.Id" />
-            <div class="form-group">
-                <label asp-for="Identity.UserName" class="control-label"></label>
-            </div>
-            <div class="form-group">
-                <label asp-for="Identity.Email" class="control-label"></label>
-            </div>
             @if (Model.Permissions.Count > 0)
             {
                 <br>
@@ -37,14 +47,19 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @for (int idx = 0; idx < Model.Permissions.Count; idx++)
+                        @for (int i = 0, selectedPermissionsIndex = 0; i < Model.Permissions.Count; i++)
                         {
                             <tr>
                                 <td>
-                                    <label class="control-label">@Html.DisplayFor(m => m.Permissions[idx])</label>
+                                    <label class="control-label">@Html.DisplayFor(m => m.Permissions[i])</label>
                                 </td>
                                 <td>
-                                    <input type="checkbox" name="SelectedPermissions" value="@idx" class="form-check-input" />
+                                    @{
+                                        var isChecked = selectedPermissionsIndex < Model.SelectedPermissions.Count
+                                        && Model.SelectedPermissions[selectedPermissionsIndex] == i;
+                                        if (isChecked) { selectedPermissionsIndex++; }
+                                    }
+                                    <input type="checkbox" name="SelectedPermissions" value="@i" class="form-check-input" checked=@isChecked />
                                 </td>
                             </tr>
                         }

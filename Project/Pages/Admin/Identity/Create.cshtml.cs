@@ -7,6 +7,8 @@ namespace Project.Pages.Admin.Identity;
 public class CreateModel : CrudPageModel
 {
     public CreateModel(UserManager<Models.Identity> users) : base(users) { }
+    [BindProperty]
+    public Models.SummaryIdentity Identity { get; set; } = default!;
     [BindProperty, Required, DataType(DataType.Password)]
     public string NewPassword { get; set; } = default!;
     public async Task<IActionResult> OnPostAsync()

@@ -5,6 +5,7 @@ namespace Project.Pages.Admin.Identity;
 
 public class DetailsModel : CrudPageModel
 {
+    public Models.SummaryIdentity Identity { get; set; } = default!;
     public DetailsModel(UserManager<Models.Identity> users) : base(users) { }
     public async Task<IActionResult> OnGetAsync(int? id)
     {
