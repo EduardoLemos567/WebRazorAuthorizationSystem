@@ -6,13 +6,9 @@ using Project.Data;
 namespace Project.Pages.Admin.MovieCategory;
 
 [RequirePermission(Places.MovieCategory, Actions.List)]
-public class IndexModel : PageModel
+public class IndexModel : CrudPageModel
 {
-    private readonly DataDbContext db;
-    public IndexModel(DataDbContext context)
-    {
-        db = context;
-    }
+    public IndexModel(DataDbContext db) : base(db) { }
     public IList<Models.MovieCategory> MovieCategories { get; set; } = default!;
     public async Task OnGetAsync()
     {

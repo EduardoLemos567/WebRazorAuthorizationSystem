@@ -4,10 +4,9 @@ using Project.Authorization;
 
 namespace Project.Pages.Admin.Permissions.Identity;
 
-public class IndexModel : PageModel
+public class IndexModel : CrudPageModel
 {
-    private readonly UserManager<Models.Identity> users;
-    public IndexModel(UserManager<Models.Identity> users) => this.users = users;
+    public IndexModel(UserManager<Models.Identity> users, CachedDefaultData cachedData) : base(users, cachedData) { }
     public IList<Models.Identity> Identities { get; set; } = default!;
     public async Task OnGetAsync()
     {

@@ -5,15 +5,9 @@ using Project.Authorization;
 
 namespace Project.Pages.Admin.Role;
 
-public class IndexModel : PageModel
+public class IndexModel : CrudPageModel
 {
-    private readonly RoleManager<Models.Role> roles;
-    private readonly CachedDefaultData cachedData;
-    public IndexModel(RoleManager<Models.Role> roles, CachedDefaultData cachedData)
-    {
-        this.roles = roles;
-        this.cachedData = cachedData;
-    }
+    public IndexModel(RoleManager<Models.Role> roles, CachedDefaultData cachedData) : base(roles, cachedData) { }
     public IList<Models.Role> Roles { get; set; } = default!;
     public async Task OnGetAsync()
     {

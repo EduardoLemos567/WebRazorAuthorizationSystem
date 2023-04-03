@@ -4,13 +4,9 @@ using Project.Data;
 
 namespace Project.Pages.Admin.Movie;
 
-public class IndexModel : PageModel
+public class IndexModel : CrudPageModel
 {
-    private readonly DataDbContext db;
-    public IndexModel(DataDbContext context)
-    {
-        db = context;
-    }
+    public IndexModel(DataDbContext db) : base(db) { }
     public IList<Models.Movie> Movies { get; set; } = default!;
     public async Task OnGetAsync()
     {

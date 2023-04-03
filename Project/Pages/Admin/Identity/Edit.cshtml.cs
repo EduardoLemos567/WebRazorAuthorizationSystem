@@ -45,6 +45,6 @@ public class EditModel : CrudPageModel
         {
             return Content("User update failed");
         }
-        return Content("User updated");
+        return RedirectToPage("./Index");
     }
 }

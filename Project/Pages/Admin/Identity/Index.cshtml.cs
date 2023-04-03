@@ -4,10 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Project.Pages.Admin.Identity;
 
-public class IndexModel : PageModel
+public class IndexModel : CrudPageModel
 {
-    private readonly UserManager<Models.Identity> users;
-    public IndexModel(UserManager<Models.Identity> users) => this.users = users;
+    public IndexModel(UserManager<Models.Identity> users) : base(users) { }
     public IList<Models.Identity> Identities { get; set; } = default!;
     public async Task OnGetAsync()
     {
