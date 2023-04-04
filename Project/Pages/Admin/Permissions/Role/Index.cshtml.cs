@@ -1,20 +1,17 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Project.Authorization;
-using Project.Data;
+using Project.Services;
 
 namespace Project.Pages.Admin.Permissions.Role;
 
+[RequirePermission(Places.PermissionsRole, Actions.List)]
 public class IndexModel : CrudPageModel
 {
-    public IndexModel(RoleManager<Models.Role> roles, CachedDefaultData cachedData) : base(roles, cachedData) { }
+    public IndexModel(AdminRules rules, RoleManager<Models.Role> roles, CachedPermissions cachedData) : base(rules, roles, cachedData) { }
     public IList<Models.Role> Roles { get; set; } = default!;
     public async Task OnGetAsync()
     {
-        Roles = await roles.Roles.Where(r =>
-            r.Name != DefaultRoles.User.ToString()
-            && r.Name != DefaultRoles.Admin.ToString()
-        ).ToListAsync();
+        Roles = await rules.GetAllNonDefaultRoles().ToListAsync();
     }
 }

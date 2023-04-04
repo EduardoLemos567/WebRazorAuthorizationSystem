@@ -1,21 +1,19 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Project.Authorization;
+using Project.Services;
 
 namespace Project.Pages.Admin.Role;
 
 public class CrudPageModel : PageModel
 {
+    protected readonly AdminRules rules;
     protected readonly RoleManager<Models.Role> roles;
-    protected readonly CachedDefaultData cachedData;
-    public CrudPageModel(RoleManager<Models.Role> roles, CachedDefaultData cachedData)
+    protected readonly CachedPermissions cachedData;
+    public CrudPageModel(AdminRules rules, RoleManager<Models.Role> roles, CachedPermissions cachedData)
     {
+        this.rules = rules;
         this.roles = roles;
         this.cachedData = cachedData;
-    }
-    protected async Task<Models.Role?> TryFindRoleAsync(int? id)
-    {
-        if (id is null) { return null; }
-        return await roles.FindByIdAsync(id.ToString()!);
     }
 }

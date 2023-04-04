@@ -18,7 +18,7 @@ public static class Requirements
     {
         return new((from c in AllRequiredPermissions() select c.data).ToArray());
     }
-    public static IEnumerable<DefaultRoles> AllRequiredRoles()
+    public static IEnumerable<string> AllRequiredRoles()
     {
         var a = Assembly.GetExecutingAssembly();
         return (from t in a.GetTypes()
@@ -44,7 +44,7 @@ public static class Requirements
         Array.Sort(permissionsChars);
         var selected = new int[permissionsChars.Length];
         var selectedCount = 0;
-        for (int i = 0; i < sortedPermissions.Count; i++)
+        for (var i = 0; i < sortedPermissions.Count; i++)
         {
             if (sortedPermissions[i].data == permissionsChars[selectedCount])
             {
@@ -57,7 +57,7 @@ public static class Requirements
     public static string PermissionsIndicesToString(in IList<int> permissionsIndices, IReadOnlyList<Permission> sortedPermissions)
     {
         var permissionsChars = new char[permissionsIndices.Count];
-        for (int i = 0; i < permissionsIndices.Count; i++)
+        for (var i = 0; i < permissionsIndices.Count; i++)
         {
             permissionsChars[i] = sortedPermissions[permissionsIndices[i]].data;
         }

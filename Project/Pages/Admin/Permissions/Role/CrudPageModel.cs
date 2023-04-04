@@ -2,34 +2,21 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Project.Authorization;
-using System.Security.Claims;
+using Project.Services;
 
 namespace Project.Pages.Admin.Permissions.Role;
 
 public class CrudPageModel : PageModel
 {
+    protected readonly AdminRules rules;
     protected readonly RoleManager<Models.Role> roles;
-    protected readonly CachedDefaultData cachedData;
-    public CrudPageModel(RoleManager<Models.Role> roles, CachedDefaultData cachedData)
+    protected readonly CachedPermissions cachedData;
+    public CrudPageModel(AdminRules rules, RoleManager<Models.Role> roles, CachedPermissions cachedData)
     {
+        this.rules = rules;
         this.roles = roles;
         this.cachedData = cachedData;
-    }    
-    public IReadOnlyList<string> Permissions => cachedData.SortedPermissionsStrings;
-    protected async Task<Models.Role?> TryFindRoleAsync(int? id)
-    {
-        if (id is null) { return null; }
-        return await roles.FindByIdAsync(id.ToString()!);
     }
-    public static bool CanModifyPermissions(Models.Role role)
-    {
-        return role.Name != DefaultRoles.User.ToString() && role.Name != DefaultRoles.Admin.ToString();
-    }
+    public IReadOnlyList<string> AllPermissions => cachedData.SortedPermissionsStrings;
     protected IActionResult NotAllowedModify() => Content("Role 'User' cannot have permissions.");
-    protected async Task<Claim?> TryFindOldClaimAsync(Models.Role role)
-    {
-        return (await roles.GetClaimsAsync(role))
-            .Where(c => c.Type == Requirements.PERMISSIONS_CLAIM_TYPE)
-            .FirstOrDefault();
-    }    
 }

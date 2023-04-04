@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Project.Authorization;
 using Project.Data;
 
 namespace Project.Pages.Admin.Movie;
 
+[RequirePermission(Places.Movie, Actions.List)]
 public class IndexModel : CrudPageModel
 {
     public IndexModel(DataDbContext db) : base(db) { }

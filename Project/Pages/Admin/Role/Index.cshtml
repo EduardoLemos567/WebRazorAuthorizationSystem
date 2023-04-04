@@ -16,12 +16,6 @@
             <th>
                 @Html.DisplayNameFor(model => model.Roles[0].Name)
             </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Roles[0].NormalizedName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Roles[0].ConcurrencyStamp)
-            </th>
             <th></th>
         </tr>
     </thead>
@@ -30,12 +24,6 @@
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.NormalizedName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ConcurrencyStamp)
             </td>
             <td>
                 <a asp-page="./Edit" asp-route-id="@item.Id">Edit</a> |

@@ -1,26 +1,28 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Project.Authorization;
+using Project.Services;
 
 namespace Project.Pages.Admin.Role;
 
+[RequirePermission(Places.Role, Actions.Delete)]
 public class DeleteModel : CrudPageModel
 {
-    public DeleteModel(RoleManager<Models.Role> roles, CachedDefaultData cachedData) : base(roles, cachedData) { }
+    public DeleteModel(AdminRules rules, RoleManager<Models.Role> roles, CachedPermissions cachedData) : base(rules, roles, cachedData) { }
     public Models.SummaryRole Role { get; set; } = default!;
     public async Task<IActionResult> OnGetAsync(int? id)
     {
-        var role = await TryFindRoleAsync(id);
+        var role = await rules.TryFindRoleAsync(id);
         if (role is null) { return NotFound(); }
-        if (cachedData.IsDefaultRole(role)) { return CantDeleteDefault(); }
+        if (!rules.CanCRUDRole(role.Name!)) { return CantDeleteDefault(); }
         Role = Models.SummaryRole.FromRole(role);
         return Page();
     }
     public async Task<IActionResult> OnPostAsync(int? id)
     {
-        var role = await TryFindRoleAsync(id);
+        var role = await rules.TryFindRoleAsync(id);
         if (role is null) { return NotFound(); }
-        if (cachedData.IsDefaultRole(role)) { return CantDeleteDefault(); }
+        if (!rules.CanCRUDRole(role.Name!)) { return CantDeleteDefault(); }
         var deletionResult = await roles.DeleteAsync(role);
         if (!deletionResult.Succeeded)
         {

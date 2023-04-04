@@ -1,18 +1,74 @@
 ﻿@page
-@model Project.Pages.Admin.Identity.EditModel
+@model Project.Pages.Admin.Enrole.EditModel
 
 @{
     ViewData["Title"] = "Edit";
 }
-
+<br>
 <h1>Edit</h1>
-
+<br>
 <h4>Identity</h4>
 <hr />
+<dl class="row">
+    <dt class="col-sm-2">
+        @Html.DisplayNameFor(model => model.Identity.Alias)
+    </dt>
+    <dd class="col-sm-10">
+        @Html.DisplayFor(model => model.Identity.Alias)
+    </dd>
+    <dt class="col-sm-2">
+        @Html.DisplayNameFor(model => model.Identity.UserName)
+    </dt>
+    <dd class="col-sm-10">
+        @Html.DisplayFor(model => model.Identity.UserName)
+    </dd>
+    <dt class="col-sm-2">
+        @Html.DisplayNameFor(model => model.Identity.Email)
+    </dt>
+    <dd class="col-sm-10">
+        @Html.DisplayFor(model => model.Identity.Email)
+    </dd>
+</dl>
 <div class="row">
     <div class="col-md-4">
         <form method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>            
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @if (Model.AllRoles.Count > 0)
+            {
+                <br>
+                <span asp-validation-for="SelectedRoles" class="text-danger"></span>
+                <table class="table form-group">
+                    <thead>
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.AllRoles)
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0, selectedRolesIndex = 0; i < Model.AllRoles.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    <label class="control-label">@Html.DisplayFor(m => m.AllRoles[i])</label>
+                                </td>
+                                <td>
+                                    @{
+                                        var isChecked = selectedRolesIndex < Model.SelectedRoles.Count
+                                        && Model.SelectedRoles[selectedRolesIndex] == i;
+                                        if (isChecked) { selectedRolesIndex++; }
+                                    }
+                                    <input type="checkbox" name="@nameof(Model.SelectedRoles)" value="@i" class="form-check-input" checked=@isChecked />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
         </form>
     </div>
 </div>
@@ -22,5 +78,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

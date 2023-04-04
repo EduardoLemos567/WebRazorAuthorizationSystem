@@ -7,7 +7,9 @@ public enum Places : short
     MovieCategory,
     Identity,
     Role,
-    Permission,
+    PermissionsIdentity,
+    PermissionsRole,
+    Enrole,
     // Max 8191 options = 13 bits
 }
 
@@ -22,9 +24,21 @@ public enum Actions : short
     // Max 8 options = 3 bits
 }
 
-public enum DefaultRoles
+public static class DefaultRoles
 {
-    User,
-    Staff,
-    Admin,
+    public const string User = "User";
+    public const string Staff = "Staff";
+    public const string Admin = "Admin";
+    public static bool IsDefaultRole(string name)
+    {
+        return name is User
+            or Staff
+            or Admin;
+    }
+    public static IEnumerable<string> GetEnumerable()
+    {
+        yield return User;
+        yield return Staff;
+        yield return Admin;
+    }
 }

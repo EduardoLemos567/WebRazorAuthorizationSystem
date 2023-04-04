@@ -21,7 +21,7 @@
     <div class="col-md-4">
         <form method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            @if (Model.Permissions.Count > 0)
+            @if (Model.AllPermissions.Count > 0)
             {
                 <br>
                 <span asp-validation-for="SelectedPermissions" class="text-danger"></span>
@@ -29,17 +29,17 @@
                     <thead>
                         <tr>
                             <th>
-                                @Html.DisplayNameFor(model => model.Permissions)
+                                @Html.DisplayNameFor(model => model.AllPermissions)
                             </th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        @for (int i = 0, selectedPermissionsIndex = 0; i < Model.Permissions.Count; i++)
+                        @for (int i = 0, selectedPermissionsIndex = 0; i < Model.AllPermissions.Count; i++)
                         {
                             <tr>
                                 <td>
-                                    <label class="control-label">@Html.DisplayFor(m => m.Permissions[i])</label>
+                                    <label class="control-label">@Html.DisplayFor(m => m.AllPermissions[i])</label>
                                 </td>
                                 <td>
                                     @{
@@ -47,7 +47,7 @@
                                         && Model.SelectedPermissions[selectedPermissionsIndex] == i;
                                         if (isChecked) { selectedPermissionsIndex++; }
                                     }
-                                    <input type="checkbox" name="SelectedPermissions" value="@i" class="form-check-input" checked=@isChecked />
+                                    <input type="checkbox" name="@nameof(Model.SelectedPermissions)" value="@i" class="form-check-input" checked=@isChecked />
                                 </td>
                             </tr>
                         }

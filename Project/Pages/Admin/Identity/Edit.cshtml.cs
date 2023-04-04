@@ -1,19 +1,22 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Project.Authorization;
+using Project.Services;
 using System.ComponentModel.DataAnnotations;
 
 namespace Project.Pages.Admin.Identity;
 
+[RequirePermission(Places.Identity, Actions.Update)]
 public class EditModel : CrudPageModel
 {
-    public EditModel(UserManager<Models.Identity> users) : base(users) { }
+    public EditModel(AdminRules rules, UserManager<Models.Identity> users) : base(rules, users) { }
     [BindProperty]
     public Models.SummaryIdentity Identity { get; set; } = default!;
     [BindProperty, DataType(DataType.Password), Display(Name = "New password")]
     public string? NewPassword { get; set; }
     public async Task<IActionResult> OnGetAsync(int? id)
     {
-        var user = await this.TryFindUserAsync(id);
+        var user = await rules.TryFindUserAsync(id);
         if (user is null) { return NotFound(); }
         Identity = Models.SummaryIdentity.FromIdentity(user);
         return Page();
@@ -25,7 +28,7 @@ public class EditModel : CrudPageModel
             return Page();
         }
         // Find user
-        var user = await this.TryFindUserAsync(Identity.Id);
+        var user = await rules.TryFindUserAsync(Identity.Id);
         if (user is null) { return NotFound(); }
         // Change password
         if (!string.IsNullOrEmpty(NewPassword))

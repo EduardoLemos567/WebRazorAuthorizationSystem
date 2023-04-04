@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Project.Authorization;
 using Project.Data;
 
 namespace Project.Pages.Admin.Movie;
 
+[RequirePermission(Places.Movie, Actions.Create)]
 public class CreateModel : CrudPageModel
 {
     public CreateModel(DataDbContext db) : base(db) { }

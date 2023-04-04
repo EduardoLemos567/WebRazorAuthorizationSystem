@@ -14,7 +14,10 @@
                 @Html.DisplayNameFor(model => model.Selection[0].UserName)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Selection[1].RoleNames)
+                @Html.DisplayNameFor(model => model.Selection[0].Email)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Selection[0].RoleNames)
             </th>
         </tr>
     </thead>
@@ -24,6 +27,9 @@
             <tr>
                 <td>
                     @Html.DisplayFor(modelItem => item.UserName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Email)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.RoleNames)

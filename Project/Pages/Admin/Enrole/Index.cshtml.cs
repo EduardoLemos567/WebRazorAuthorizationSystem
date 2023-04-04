@@ -1,14 +1,15 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Project.Authorization;
 using Project.Data;
 
 namespace Project.Pages.Admin.Enrole;
 
+[RequirePermission(Places.Enrole, Actions.List)]
 public class IndexModel : PageModel
 {
-    public record struct Entry(int UserId, string UserName, string RoleNames);
+    public record struct Entry(int UserId, string UserName, string Email, string RoleNames);
     private readonly DataDbContext db;
     public IndexModel(DataDbContext db) => this.db = db;
     public IList<Entry> Selection { get; set; } = default!;
@@ -22,6 +23,7 @@ public class IndexModel : PageModel
                     {
                         UserId = user.Id,
                         UserName = user.UserName,
+                        Email = user.Email,
                         RoleName = role.Name
                     };
         var query2 = from e in query
@@ -30,6 +32,7 @@ public class IndexModel : PageModel
                      {
                          UserId = grouped.First().UserId,
                          UserName = grouped.First().UserName,
+                         Email = grouped.First().Email,
                          RoleNames = string.Join(", ", grouped.Select(m => m.RoleName))
                      };
         //return Content(query2.ToQueryString());

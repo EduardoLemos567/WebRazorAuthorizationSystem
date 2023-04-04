@@ -2,34 +2,21 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Project.Authorization;
-using System.Security.Claims;
+using Project.Services;
 
 namespace Project.Pages.Admin.Permissions.Identity;
 
 public class CrudPageModel : PageModel
 {
+    protected readonly AdminRules rules;
     protected readonly UserManager<Models.Identity> users;
-    protected readonly CachedDefaultData cachedData;
-    public CrudPageModel(UserManager<Models.Identity> users, CachedDefaultData cachedData)
+    protected readonly CachedPermissions cachedData;
+    public CrudPageModel(AdminRules rules, UserManager<Models.Identity> users, CachedPermissions cachedData)
     {
+        this.rules = rules;
         this.users = users;
         this.cachedData = cachedData;
     }
-    public IReadOnlyList<string> Permissions => cachedData.SortedPermissionsStrings;
-    protected async Task<Models.Identity?> TryFindUserAsync(int? id)
-    {
-        if (id is null) { return null; }
-        return await users.FindByIdAsync(id.ToString()!);
-    }
-    protected Task<bool> CanModifyPermissionsAsync(Models.Identity user)
-    {
-        return users.IsInRoleAsync(user, DefaultRoles.Staff.ToString());
-    }
+    public IReadOnlyList<string> AllPermissions => cachedData.SortedPermissionsStrings;
     protected IActionResult NotAllowedModify() => Content("User is not member of 'Staff', cant have permissions.");
-    protected async Task<Claim?> TryFindOldClaimAsync(Models.Identity user)
-    {
-        return (await users.GetClaimsAsync(user))
-            .Where(c => c.Type == Requirements.PERMISSIONS_CLAIM_TYPE)
-            .FirstOrDefault();
-    }
 }

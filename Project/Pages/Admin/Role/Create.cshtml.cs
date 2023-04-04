@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Project.Authorization;
+using Project.Services;
 
 namespace Project.Pages.Admin.Role;
 
+[RequirePermission(Places.Role, Actions.Create)]
 public class CreateModel : CrudPageModel
 {
-    public CreateModel(RoleManager<Models.Role> roles, CachedDefaultData cachedData) : base(roles, cachedData) { }
+    public CreateModel(AdminRules rules, RoleManager<Models.Role> roles, CachedPermissions cachedData) : base(rules, roles, cachedData) { }
     [BindProperty]
     public Models.SummaryRole Role { get; set; } = default!;
     public async Task<IActionResult> OnPostAsync()

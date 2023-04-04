@@ -36,7 +36,7 @@ public class CreateModel : PageModel
                 return Content("User creation failed");
             }
         }
-        var addToRoleResult = await users.AddToRoleAsync(identity, DefaultRoles.User.ToString());
+        var addToRoleResult = await users.AddToRoleAsync(identity, DefaultRoles.User);
         if (!addToRoleResult.Succeeded)
         {
             return Content("User creation failed");

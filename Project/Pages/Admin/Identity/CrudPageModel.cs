@@ -1,17 +1,17 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Project.Services;
 
 namespace Project.Pages.Admin.Identity;
 
 public class CrudPageModel : PageModel
 {
+    protected readonly AdminRules rules;
     protected readonly UserManager<Models.Identity> users;
-    public CrudPageModel(UserManager<Models.Identity> users) => this.users = users;
-    protected async Task<Models.Identity?> TryFindUserAsync(int? id)
+    public CrudPageModel(AdminRules rules, UserManager<Models.Identity> users)
     {
-        if (id is null) { return null; }
-        return await users.FindByIdAsync(id!.ToString()!);
+        this.rules = rules;
+        this.users = users;
     }
     protected bool CheckPasswordErrors(IdentityResult result, string passwordPropName)
     {

@@ -1,5 +1,5 @@
 ﻿@page
-@model Project.Pages.Admin.Identity.DetailsModel
+@model Project.Pages.Admin.Enrole.DetailsModel
 
 @{
     ViewData["Title"] = "Details";
@@ -12,9 +12,44 @@
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-            @*Html.DisplayNameFor(model => model.Identity.Alias)*@
+            @Html.DisplayNameFor(model => model.Identity.Alias)
         </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Identity.Alias)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Identity.UserName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Identity.UserName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Identity.Email)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Identity.Email)
+        </dd>
     </dl>
+    <br>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Roles)
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var role in Model.Roles)
+            {
+                <tr>
+                    <td>
+                        <label class="control-label">@Html.DisplayFor(m => role)</label>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>
 <div>
     <a asp-page="./Edit" asp-route-id="@Model.Identity.Id">Edit</a> |

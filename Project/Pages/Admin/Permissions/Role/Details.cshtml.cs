@@ -1,24 +1,26 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Project.Authorization;
+using Project.Services;
 
 namespace Project.Pages.Admin.Permissions.Role;
 
+[RequirePermission(Places.PermissionsRole, Actions.Read)]
 public class DetailsModel : CrudPageModel
 {
+    public DetailsModel(AdminRules rules, RoleManager<Models.Role> roles, CachedPermissions cachedData) : base(rules, roles, cachedData) { }
     public Models.SummaryRole Role { get; set; } = default!;
     public IList<int> SelectedPermissions { get; set; } = default!;
-    public DetailsModel(RoleManager<Models.Role> roles, CachedDefaultData cachedData) : base(roles, cachedData) { }
     public async Task<IActionResult> OnGetAsync(int? id)
     {
-        var role = await TryFindRoleAsync(id);
+        var role = await rules.TryFindRoleAsync(id);
         if (role is null) { return NotFound(); }
-        if (!CanModifyPermissions(role)) { return NotAllowedModify(); }
+        if (!rules.CanModifyRolePermissions(role.Name!)) { return NotAllowedModify(); }
         Role = Models.SummaryRole.FromRole(role);
-        var oldClaim = await TryFindOldClaimAsync(role);
-        if (oldClaim is not null && oldClaim.Value.Length > 0)
+        var permissions = await rules.TryGetPermissionClaimAsync(role);
+        if (permissions is not null && permissions.Value.Length > 0)
         {
-            SelectedPermissions = Requirements.PermissionsStringToIndices(oldClaim.Value, cachedData.SortedPermissions);
+            SelectedPermissions = Requirements.PermissionsStringToIndices(permissions.Value, cachedData.SortedPermissions);
         }
         else
         {

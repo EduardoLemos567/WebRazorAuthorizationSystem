@@ -1,23 +1,26 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Project.Authorization;
+using Project.Services;
+using Project.Utils;
 using System.Security.Claims;
 
 namespace Project.Pages.Admin.Permissions.Role;
 
+[RequirePermission(Places.PermissionsRole, Actions.Update)]
 public class EditModel : CrudPageModel
 {
+    public EditModel(AdminRules rules, RoleManager<Models.Role> roles, CachedPermissions cachedData) : base(rules, roles, cachedData) { }
     public Models.SummaryRole Role { get; set; } = default!;
     [BindProperty]
     public IList<int> SelectedPermissions { get; set; } = default!;
-    public EditModel(RoleManager<Models.Role> roles, CachedDefaultData cachedData) : base(roles, cachedData) { }
     public async Task<IActionResult> OnGetAsync(int? id)
     {
-        var role = await TryFindRoleAsync(id);
+        var role = await rules.TryFindRoleAsync(id);
         if (role is null) { return NotFound(); }
-        if (!CanModifyPermissions(role)) { return NotAllowedModify(); }
+        if (!rules.CanModifyRolePermissions(role.Name!)) { return NotAllowedModify(); }
         Role = Models.SummaryRole.FromRole(role);
-        var oldClaim = await TryFindOldClaimAsync(role);
+        var oldClaim = await rules.TryGetPermissionClaimAsync(role);
         if (oldClaim is not null && oldClaim.Value.Length > 0)
         {
             SelectedPermissions = Requirements.PermissionsStringToIndices(oldClaim.Value, cachedData.SortedPermissions);
@@ -30,32 +33,32 @@ public class EditModel : CrudPageModel
     }
     public async Task<IActionResult> OnPostAsync(int? id)
     {
-        if (SelectedPermissionsIsInvalid())
+        if (!Util.SelectionIsValid(SelectedPermissions, AllPermissions.Count))
         {
             ModelState.AddModelError("SelectedPermissions", "Incorrect selected permissions");
         }
-        var role = await TryFindRoleAsync(id);
+        var role = await rules.TryFindRoleAsync(id);
         if (role is null) { return NotFound(); }
-        if (!CanModifyPermissions(role)) { return NotAllowedModify(); }
+        if (!rules.CanModifyRolePermissions(role.Name!)) { return NotAllowedModify(); }
         if (!ModelState.IsValid)
         {
             Role = Models.SummaryRole.FromRole(role);
             return Page();
         }
-        var oldClaim = await TryFindOldClaimAsync(role);
-        var newClaim = new Claim(
+        var permissions = await rules.TryGetPermissionClaimAsync(role);
+        var newPermissions = new Claim(
             Requirements.PERMISSIONS_CLAIM_TYPE,
             Requirements.PermissionsIndicesToString(SelectedPermissions, cachedData.SortedPermissions)
         );
-        if (oldClaim is not null)
+        if (permissions is not null)
         {
-            var removeClaimResult = await roles.RemoveClaimAsync(role, oldClaim);
+            var removeClaimResult = await roles.RemoveClaimAsync(role, permissions);
             if (!removeClaimResult.Succeeded)
             {
                 return SavePermissionError(string.Join(", ", from e in removeClaimResult.Errors select e.Description));
             }
         }
-        var addClaimResult = await roles.AddClaimAsync(role, newClaim);
+        var addClaimResult = await roles.AddClaimAsync(role, newPermissions);
         if (!addClaimResult.Succeeded)
         {
             return SavePermissionError(string.Join(", ", from e in addClaimResult.Errors select e.Description));
@@ -66,5 +69,4 @@ public class EditModel : CrudPageModel
     {
         return Content($"Could not save permissions, try again.\nReasons: {reasons}");
     }
-    private bool SelectedPermissionsIsInvalid() => (from idx in SelectedPermissions where idx < 0 || idx >= Permissions.Count select idx).Any();
 }

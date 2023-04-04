@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Project.Authorization;
 using Project.Data;
 using Project.Models;
+using Project.Services;
 
 namespace Project.Startup;
 
@@ -18,7 +19,8 @@ public static class Startup
         AddDatabaseService(services, configurator);
         AddLoginService(services);
         // Add initial sorted permissions list as option
-        services.AddSingleton<CachedDefaultData>();
+        services.AddSingleton<CachedPermissions>();
+        services.AddScoped<AdminRules>();
     }
     private static void AddDatabaseService(IServiceCollection services, ConfigurationManager configurator)
     {
@@ -72,11 +74,13 @@ public static class Startup
         using (var scope = app.Services.CreateScope())
         {
             var roles = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
+            var rules = scope.ServiceProvider.GetRequiredService<AdminRules>();
+            var cachedPermissions = scope.ServiceProvider.GetRequiredService<CachedPermissions>();
             var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("AddInitialData");
 
-            {   // Create roles
+            {   // Create DefaultRoles
                 // If any of default roles doesnt exist in Roles, we recreate missing ones.
-                var defaultRoles = Enum.GetNames<DefaultRoles>();
+                var defaultRoles = DefaultRoles.GetEnumerable();
                 var createdRoles = from r in roles.Roles select r.Name;
                 foreach (var name in defaultRoles.Except(createdRoles))
                 {
@@ -96,17 +100,26 @@ public static class Startup
                     return;
                 }
                 // Add all permissions
-                var oldClaims = roles.GetClaimsAsync(adminRole!).Result;
-                if ((from c in oldClaims where c.Type == Requirements.PERMISSIONS_CLAIM_TYPE select c).Any())
+                // Compile all permissions
+                var allPermissionsString = Requirements.AllRequiredPermissionsString();
+                var permissions = rules.TryGetPermissionClaimAsync(adminRole!).Result;
+                if (permissions is not null && permissions.Value == allPermissionsString)
                 {
                     logger.LogInformation("Admin role already contains permissions.");
                 }
                 else
                 {
-                    var addClaimResult = roles.AddClaimAsync(adminRole!,
-                            new(Requirements.PERMISSIONS_CLAIM_TYPE,
-                                Requirements.AllRequiredPermissionsString())).Result;
-                    if (!addClaimResult.Succeeded)
+                    if (permissions is not null)
+                    {
+                        var removePermissionsResult = roles.RemoveClaimAsync(adminRole, permissions).Result;
+                        if (!removePermissionsResult.Succeeded)
+                        {
+                            logger.LogWarning("Could not remove old permissions from admin role.");
+                        }
+                    }
+                    permissions = new(Requirements.PERMISSIONS_CLAIM_TYPE, allPermissionsString);
+                    var addPermissionsResult = roles.AddClaimAsync(adminRole!, permissions).Result;
+                    if (!addPermissionsResult.Succeeded)
                     {
                         logger.LogWarning("Could not add all permissions to admin role.");
                     }
