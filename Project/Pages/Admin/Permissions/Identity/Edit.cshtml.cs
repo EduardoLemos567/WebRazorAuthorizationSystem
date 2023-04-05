@@ -33,7 +33,7 @@ public class EditModel : CrudPageModel
     }
     public async Task<IActionResult> OnPostAsync(int? id)
     {
-        if (!Util.SelectionIsValid(SelectedPermissions, AllPermissions.Count))
+        if (Util.SelectionIsInvalid(SelectedPermissions, AllPermissions.Count))
         {
             ModelState.AddModelError("SelectedPermissions", "Incorrect selected permissions");
         }
@@ -46,10 +46,6 @@ public class EditModel : CrudPageModel
             return Page();
         }
         var permissions = await rules.TryGetPermissionClaimAsync(identity);
-        var newPermissions = new Claim(
-            Requirements.PERMISSIONS_CLAIM_TYPE,
-            Requirements.PermissionsIndicesToString(SelectedPermissions, cachedData.SortedPermissions)
-        );
         if (permissions is not null)
         {
             var removeClaimResult = await users.RemoveClaimAsync(identity, permissions);
@@ -58,7 +54,11 @@ public class EditModel : CrudPageModel
                 return SavePermissionError(string.Join(", ", from e in removeClaimResult.Errors select e.Description));
             }
         }
-        var addClaimResult = await users.AddClaimAsync(identity, newPermissions);
+        permissions = new Claim(
+            Requirements.PERMISSIONS_CLAIM_TYPE,
+            Requirements.PermissionsIndicesToString(SelectedPermissions, cachedData.SortedPermissions)
+        );
+        var addClaimResult = await users.AddClaimAsync(identity, permissions);
         if (!addClaimResult.Succeeded)
         {
             return SavePermissionError(string.Join(", ", from e in addClaimResult.Errors select e.Description));

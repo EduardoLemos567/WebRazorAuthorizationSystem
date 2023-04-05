@@ -16,7 +16,7 @@ public static class Util
             yield return FindIndex(allValues, value);
         }
     }
-    public static bool SelectionIsValid(IEnumerable<int> selectedValues, int AllValuesCount) => (from idx in selectedValues where idx >= 0 || idx < AllValuesCount select idx).Any();
+    public static bool SelectionIsInvalid(IEnumerable<int> selectedValues, int AllValuesCount) => (from idx in selectedValues where idx < 0 || idx >= AllValuesCount select idx).Any();
     public static int FindIndex(IList<string> allValues, string selectedValue)
     {
         for (var i = 0; i < allValues.Count; i++)

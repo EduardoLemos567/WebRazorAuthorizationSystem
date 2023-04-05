@@ -53,7 +53,7 @@ public static class Startup
         options.Lockout.AllowedForNewUsers = true;
         // User settings.
         options.User.AllowedUserNameCharacters =
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+ áéíóú";
         options.User.RequireUniqueEmail = true;
     }
     private static void AddCookieAuthenticationOptions(CookieAuthenticationOptions options)
