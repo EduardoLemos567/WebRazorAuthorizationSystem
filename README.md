@@ -1,8 +1,8 @@
-# Sample Project
+# Authorization System Project
 
 This is a sample project using:
  - C# 11 	
- -  .NET Core 7.0 	
+ - .NET Core 7.0 	
  - ASP.NET Core 7.0.4
  - EF Core 7.0.4
  - Razor Pages Model
@@ -10,20 +10,19 @@ This is a sample project using:
 ## Description
 I've used this project to learn details about the ASP.NET.
 Some decisions are made towards learning instead of just following 
-every tutorial/sample on the internet (which i did too).
+every tutorial/sample on the internet (which i did use to learn).
 
 My initial intention was to have two accounts models: StaffAccount and UserAccount.
 </br>
-StaffAccount, having the roles and permissions to navigate on the site's "admin panel".
+StaffAccount, an employee account having the roles and permissions to navigate on the site's "admin panel" or any other internal page.
 </br>
 While the UserAccount would be to hold user/clients information, related to the business.
 
 I would have to reimplement a lot of the Identity features like: UserManager, UserStore, RoleStore, etc.
 
-I've decided to embrace the identity model. If needed to separate these two previous models, i would use different profiles.
-I would create a Profile model: StaffProfile and UserProfile, allowing both to point to a single identity.
-Allowing a Staff to also be a User/Client and have its particular data separated, while maintaing the single
-identity for login and security.
+I've decided to use the default identity model. If need to separate into a more custom model i can use identity as a central model for authentication.
+Every other data related to profile will be in separated and point back to the identity.
+This way a user account can also be a staff account and have both data separated.
 
 I've used the roles model to hold differences between a User, Staff or Admin and allowing the admin to include
 any other role needed through the admin panel.
@@ -32,7 +31,7 @@ A identity can be a User (client), a Staff (having other positions like manager,
 and the Admin (single staff user with all power for configurations).
 
 Since i learned that claims can be stored per identity as well per role. 
-When a identity user logs in, all the claims from the user are concatenated with the roles claims.
+When a identity logs in, all the claims from the user are concatenated with the roles claims.
 
 This is perfect for a permission model where a identity and a role can have different sets of permissions.
 For example: you can have your staff user without any custom permission, and add/remove him to a role where
